@@ -12,7 +12,7 @@
 
 //     @ManyToOne(() => Role, (Role) => Role.id)
 //     role: number;
-    
+
 //     @ManyToOne(() => Permission, (Permission) => Permission.id)
 //     permission: Permission;
 // }

@@ -1,33 +1,22 @@
-import {
-  ExecutionContext,
-  Injectable,
-} from '@nestjs/common';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
 export class AccessTokenGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) { 
+  constructor(private reflector: Reflector) {
     super();
   }
 
-  // canActivate(context: ExecutionContext) {
-  //   const permissions = this.reflector.getAllAndOverride<boolean>("permissions", [
-  //     context.getHandler(),
-  //     context.getClass(),
-  //   ]);
+  async canActivate(context: ExecutionContext): Promise<any> {
+    const req = context.switchToHttp().getRequest();
 
-  //   if (!permissions) {
-  //     return true;
-  //   }
-  //   return super.canActivate(context);
-  // }
-
-  canActivate(context: ExecutionContext) {
-    const role = this.reflector.getAllAndOverride<boolean>("role", [
+    const role = this.reflector.getAllAndOverride<boolean>('role', [
       context.getHandler(),
       context.getClass(),
     ]);
+
+    req.role = role;
 
     if (!role) {
       return true;

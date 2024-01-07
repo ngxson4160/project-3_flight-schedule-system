@@ -5,10 +5,12 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { AccessTokenGuard } from './auth/guards/jwt-access.guard';
 import { AuthModule } from './auth/auth.module';
+import { HelicopterModule } from './modules/helicopter/helicopter.module';
 
 @Module({
   imports: [
     AuthModule,
+    HelicopterModule,
     ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController],

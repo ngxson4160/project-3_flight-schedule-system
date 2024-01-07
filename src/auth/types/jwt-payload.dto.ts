@@ -1,6 +1,6 @@
 export type JwtPayload = {
-    username: string;
-    email: string;
-}
+  username: string;
+  email: string;
+};
 
-export type JwtPayloadWithRefreshToken = JwtPayload & {refreshToken: string}
+export type JwtPayloadWithRefreshToken = JwtPayload & { refreshToken: string };

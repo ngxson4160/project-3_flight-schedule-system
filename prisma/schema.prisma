@@ -35,7 +35,7 @@ model User {
     dob          DateTime?
     gender       GENDER
     phoneNumber  String?   @map("phone_number") @db.VarChar(255)
-    token        String?   @db.VarChar(500)
+    accessToken        String?   @db.VarChar(500)
     refreshToken String?   @map("refresh_token") @db.VarChar(500)
     role         ROLE
 
@@ -172,7 +172,8 @@ model Helicopter {
     updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
     updateBy Int?      @map("update_by")
 
-    capacity    Json
+    // capacity    Json
+    capacity    Int
     description String?
     img         String?
     type        String?
