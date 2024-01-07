@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+enum GENDER {
+    MALE
+    FEMALE
+    OTHER
+}
+
+enum ROLE {
+    ADMIN
+    PILOT
+    TOUR_GUIDE
+}
+
+model User {
+    id       Int       @id @default(autoincrement())
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
+
+    email        String    @unique
+    firstName    String
+    lastName     String
+    password     String    @db.VarChar(255)
+    avata        String?
+    dob          DateTime?
+    gender       GENDER
+    phoneNumber  String?   @map("phone_number") @db.VarChar(255)
+    accessToken        String?   @db.VarChar(500)
+    refreshToken String?   @map("refresh_token") @db.VarChar(500)
+    role         ROLE
+
+    userFlightSchedule UserFlightSchedule[]
+    workSchedule       WorkSchedule[]
+
+    userRole UserRole[]
+
+    @@map("user")
+}
+
+model Role {
+    id       Int       @id @default(autoincrement())
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
+
+    name     String
+    UserRole UserRole[]
+
+    @@map("role")
+}
+
+model Permission {
+    id       Int       @id @default(autoincrement())
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
+
+    action String
+
+    @@map("permission")
+}
+
+model UserRole {
+    userId Int  @map("user_id")
+    roleId Int  @map("role_id")
+    user   User @relation(fields: [userId], references: [id])
+    role   Role @relation(fields: [roleId], references: [id])
+
+    @@unique([userId, roleId])
+    @@map("user_role")
+}
+
+model RolePermission {
+    permissioId Int @map("permission_id")
+    roleId      Int @map("role_id")
+
+    @@unique([permissioId, roleId])
+    @@map("role_permission")
+}
+
+model Route {
+    id       Int       @id @default(autoincrement())
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
+
+    locations     Json
+    description   DateTime
+    flight_length Int
+    duration      Int?
+
+    flightSchedule         FlightSchedule[]
+    adventureOparatingTime AdventureOparatingTime[]
+
+    @@map("route")
+}
+
+model FlightSchedule {
+    id       Int       @id @default(autoincrement())
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
+
+    routeId      Int        @map("route_id")
+    helicopterId Int        @map("helicopter_id")
+    route        Route      @relation(fields: [routeId], references: [id])
+    helicopter   Helicopter @relation(fields: [helicopterId], references: [id])
+
+    date     DateTime
+    start    DateTime
+    end      DateTime
+    duration Int
+
+    userFlightSchedule UserFlightSchedule[]
+
+    @@map("flight_schedule")
+}
+
+model UserFlightSchedule {
+    userId           Int            @map("user_id")
+    flightScheduleId Int            @map("flight_schedule_id")
+    user             User           @relation(fields: [userId], references: [id])
+    flightSchedule   FlightSchedule @relation(fields: [flightScheduleId], references: [id])
+
+    @@unique([userId, flightScheduleId])
+    @@map("user_flight_schedule")
+}
+
+model WorkSchedule {
+    id       Int       @id @default(autoincrement())
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
+
+    userId Int  @map("user_id")
+    user   User @relation(fields: [userId], references: [id])
+
+    date           Json
+    startMorning   DateTime?
+    endMorning     DateTime?
+    startAfternoon DateTime?
+    endAfternoon   DateTime?
+
+    @@map("work_schedule")
+}
+
+model Helicopter {
+    id       Int       @id @default(autoincrement())
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
+
+    // capacity    Json
+    capacity    Int
+    description String?
+    img         String?
+    type        String?
+    engine      String?
+    speed       String?
+
+    flightSchedule FlightSchedule[]
+}
+
+model AdventureOparatingTime {
+    id       Int       @id @default(autoincrement())
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
+
+    routeId Int   @map("route_id")
+    route   Route @relation(fields: [routeId], references: [id])
+
+    startMorning   DateTime?
+    endMorning     DateTime?
+    startAfternoon DateTime?
+    endAfternoon   DateTime?
+}
