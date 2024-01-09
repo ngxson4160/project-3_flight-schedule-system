@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { NewHelicopterDto } from './dto/create-helicopter.dto';
-import { MessageResponse } from 'src/constants/message-response.constant';
+import { MessageResponse } from 'src/common/constants/message-response.constant';
 import { OrderByHelicopterDto } from './dto/filter-helicopter';
-import { SortOrder } from 'src/constants/enum.constant';
+import { SortOrder } from 'src/common/constants/enum.constant';
 import { FilterOptions } from 'src/common/dtos/filter-options.dto';
 import { UpdateHelicopterDto } from './dto/update-helicopter.dto';
 

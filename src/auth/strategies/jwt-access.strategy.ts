@@ -10,7 +10,7 @@ import { JwtPayload } from '../types/jwt-payload.dto';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Reflector } from '@nestjs/core';
-import { MessageResponse } from 'src/constants/message-response.constant';
+import { MessageResponse } from 'src/common/constants/message-response.constant';
 
 @Injectable()
 export class AccessTokenStratey extends PassportStrategy(Strategy, 'jwt') {

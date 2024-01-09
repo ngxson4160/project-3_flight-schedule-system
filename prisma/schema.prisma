@@ -19,6 +19,13 @@ enum ROLE {
     TOUR_GUIDE
 }
 
+enum ROUTE_TYPE {
+    ADVENTURE
+    TRAINING
+    REGULAR
+    TEST
+}
+
 model User {
     id       Int       @id @default(autoincrement())
     createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
@@ -100,13 +107,14 @@ model Route {
     updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
     updateBy Int?      @map("update_by")
 
-    locations     Json
-    description   String?
+    locations    Json
+    description  String?
     flightLength Int
-    duration      Int
+    duration     Int
+    type         ROUTE_TYPE
 
     flightSchedule         FlightSchedule[]
-    adventureOparatingTime AdventureOparatingTime[]
+    adventureOparatingTime AdventureOperatingTime[]
 
     @@map("route")
 }
@@ -155,11 +163,9 @@ model WorkSchedule {
     userId Int  @map("user_id")
     user   User @relation(fields: [userId], references: [id])
 
-    date           Json
-    startMorning   DateTime?
-    endMorning     DateTime?
-    startAfternoon DateTime?
-    endAfternoon   DateTime?
+    startTime String?
+    endTime   String?
+    date      DateTime @db.Timestamp(0)
 
     @@map("work_schedule")
 }
@@ -184,7 +190,7 @@ model Helicopter {
     flightSchedule FlightSchedule[]
 }
 
-model AdventureOparatingTime {
+model AdventureOperatingTime {
     id       Int       @id @default(autoincrement())
     createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
     createBy Int?      @map("create_by")
@@ -195,8 +201,9 @@ model AdventureOparatingTime {
     routeId Int   @map("route_id")
     route   Route @relation(fields: [routeId], references: [id])
 
-    startMorning   DateTime?
-    endMorning     DateTime?
-    startAfternoon DateTime?
-    endAfternoon   DateTime?
+    startMorning   String?
+    endMorning     String?
+    startAfternoon String?
+    endAfternoon   String?
+    date           DateTime @db.Timestamp(0)
 }

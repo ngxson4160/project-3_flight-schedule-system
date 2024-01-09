@@ -3,7 +3,7 @@ import { SignUpDto } from 'src/auth/dto/sign-up.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma, User } from '@prisma/client';
 import { AuthService } from 'src/auth/auth.service';
-import { MessageResponse } from 'src/constants/message-response.constant';
+import { MessageResponse } from 'src/common/constants/message-response.constant';
 
 @Injectable()
 export class UserService {

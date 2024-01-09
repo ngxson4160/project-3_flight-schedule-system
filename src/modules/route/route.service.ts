@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { MessageResponse } from 'src/constants/message-response.constant';
+import { MessageResponse } from 'src/common/constants/message-response.constant';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRouteDto } from './dto/create-route.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';

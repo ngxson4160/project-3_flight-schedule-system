@@ -8,7 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { sign, verify } from 'jsonwebtoken';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { MessageResponse } from 'src/constants/message-response.constant';
+import { MessageResponse } from 'src/common/constants/message-response.constant';
 import { LoginDto } from './dto/login.dto';
 @Injectable()
 export class AuthService {

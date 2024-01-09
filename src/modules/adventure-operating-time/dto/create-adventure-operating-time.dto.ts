@@ -1,29 +1,49 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsDate,
+  IsISO8601,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Matches,
+  Validate,
+} from 'class-validator';
+import { MessageResponse } from 'src/common/constants/message-response.constant';
+import { RegexConstant } from 'src/common/constants/regex.constant';
 
-export class NewHelicopterDto {
-  @IsString()
-  name: string;
-
+export class AdventureOperatingTimeDto {
   @IsNumber()
-  capacity: number;
+  routeId: number;
 
   @IsString()
+  @Matches(RegexConstant.TimeReg_HH_MM, {
+    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  })
   @IsOptional()
-  description: string;
+  startMorning?: string;
 
   @IsString()
+  @Matches(RegexConstant.TimeReg_HH_MM, {
+    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  })
   @IsOptional()
-  img: string;
+  endMorning?: string;
 
   @IsString()
+  @Matches(RegexConstant.TimeReg_HH_MM, {
+    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  })
   @IsOptional()
-  type: string;
+  startAfternoon?: string;
 
   @IsString()
+  @Matches(RegexConstant.TimeReg_HH_MM, {
+    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  })
   @IsOptional()
-  engine: string;
+  endAfternoon?: string;
 
-  @IsString()
-  @IsOptional()
-  speed: string;
+  // @Transform( ({ value }) => value && new Date(value))
+  @IsISO8601()
+  date: Date;
 }

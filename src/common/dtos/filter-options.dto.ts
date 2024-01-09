@@ -1,5 +1,5 @@
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { SortOrder } from 'src/constants/enum.constant';
+import { SortOrder } from 'src/common/constants/enum.constant';
 
 export class FilterOptions {
   @IsNumber()
