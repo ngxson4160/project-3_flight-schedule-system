@@ -60,7 +60,7 @@ export class RouteService {
 
   async getListRoute() {
     const listRouteFound = await this.prisma.route.findMany();
-    
+
     return {
       message: MessageResponse.ROUTE.GET_LIST_SUCCESS,
       data: listRouteFound,

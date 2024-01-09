@@ -11,7 +11,7 @@ import { HelicopterService } from './helicopter.service';
 import { NewHelicopterDto } from './dto/create-helicopter.dto';
 import { Role } from 'src/auth/decorator/role.decorator';
 import { ROLE } from '@prisma/client';
-import { UpdateHelicopterDto,  } from './dto/update-helicopter.dto';
+import { UpdateHelicopterDto } from './dto/update-helicopter.dto';
 
 @Controller('helicopters')
 export class HelicopterController {

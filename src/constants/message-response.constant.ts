@@ -1,6 +1,7 @@
 export const MessageResponse = {
   COMMON: {
-    UPDATE_EMPTY_OBJECT: "Please fill in the information field you want to change"
+    UPDATE_EMPTY_OBJECT:
+      'Please fill in the information field you want to change',
   },
 
   USER: {

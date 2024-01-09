@@ -25,10 +25,10 @@ export class FilterHelicopterDto {
 }
 
 export class OrderByHelicopterDto {
-    @IsNumber()
-    capacity: number;
+  @IsNumber()
+  capacity: number;
 
-    @IsString()
-    @IsOptional()
-    speed: string;
-  }
+  @IsString()
+  @IsOptional()
+  speed: string;
+}
