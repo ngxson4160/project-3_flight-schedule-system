@@ -9,4 +9,4 @@ import { FlightScheduleController } from './flight-schedule.controller';
   controllers: [FlightScheduleController],
   exports: [FlightScheduleService, PrismaService],
 })
-export class UserModule {}
+export class FlightScheduleModule {}

@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
@@ -35,7 +35,7 @@ model User {
     dob          DateTime?
     gender       GENDER
     phoneNumber  String?   @map("phone_number") @db.VarChar(255)
-    accessToken        String?   @db.VarChar(500)
+    accessToken  String?   @db.VarChar(500)
     refreshToken String?   @map("refresh_token") @db.VarChar(500)
     role         ROLE
 
@@ -101,9 +101,9 @@ model Route {
     updateBy Int?      @map("update_by")
 
     locations     Json
-    description   DateTime
-    flight_length Int
-    duration      Int?
+    description   String?
+    flightLength Int
+    duration      Int
 
     flightSchedule         FlightSchedule[]
     adventureOparatingTime AdventureOparatingTime[]
@@ -173,6 +173,7 @@ model Helicopter {
     updateBy Int?      @map("update_by")
 
     // capacity    Json
+    name        String  @unique
     capacity    Int
     description String?
     img         String?

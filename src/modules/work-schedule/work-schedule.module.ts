@@ -9,4 +9,4 @@ import { WorkScheduleController } from './work-schedule.controller';
   controllers: [WorkScheduleController],
   exports: [WorkScheduleService, PrismaService],
 })
-export class UserModule {}
+export class WorkScheduleModule {}

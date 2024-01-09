@@ -6,11 +6,23 @@ import { APP_GUARD } from '@nestjs/core';
 import { AccessTokenGuard } from './auth/guards/jwt-access.guard';
 import { AuthModule } from './auth/auth.module';
 import { HelicopterModule } from './modules/helicopter/helicopter.module';
+import { AdventureOperatingTimeModule } from './modules/adventure-operating-time/adventure-operating-time.module';
+import { FlightScheduleModule } from './modules/flight-schedule/flight-schedule.module';
+import { RouteModule } from './modules/route/route.module';
+import { UserModule } from './modules/user/user.module';
+import { UserFlightScheduleModule } from './modules/user-flight-schedule/user-flight-schedule.module';
+import { WorkScheduleModule } from './modules/work-schedule/work-schedule.module';
 
 @Module({
   imports: [
     AuthModule,
+    UserModule,
     HelicopterModule,
+    RouteModule,
+    AdventureOperatingTimeModule,
+    FlightScheduleModule,
+    UserFlightScheduleModule,
+    WorkScheduleModule,
     ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController],

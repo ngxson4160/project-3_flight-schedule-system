@@ -9,4 +9,4 @@ import { AdventureOperatingTimeController } from './adventure-operating-time.con
   controllers: [AdventureOperatingTimeController],
   exports: [AdventureOperatingTimeService, PrismaService],
 })
-export class UserModule {}
+export class AdventureOperatingTimeModule {}

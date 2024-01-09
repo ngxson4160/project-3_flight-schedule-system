@@ -1,7 +1,50 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { RouteService } from './route.service';
+import { Role } from 'src/auth/decorator/role.decorator';
+import { ROLE } from '@prisma/client';
+import { CreateRouteDto } from './dto/create-route.dto';
+import { UpdateRouteDto } from './dto/update-route.dto';
 
-@Controller('route')
+@Controller('routes')
 export class RouteController {
   constructor(private readonly routeService: RouteService) {}
+
+  @Post()
+  @Role(ROLE.ADMIN)
+  async createHelicopter(@Body() createRouteDto: CreateRouteDto) {
+    return this.routeService.createRoute(createRouteDto);
+  }
+
+  @Put('/:id')
+  @Role(ROLE.ADMIN)
+  async updateRoute(
+    @Body() updateRouteDto: UpdateRouteDto,
+    @Param('id') id: string,
+  ) {
+    return this.routeService.updateRoute(+id, updateRouteDto);
+  }
+
+  @Get('/:id')
+  async getDetailRoute(@Param('id') id: string) {
+    return this.routeService.getDetailRoute(+id);
+  }
+
+  @Get()
+  async getListHelicopter() {
+    return this.routeService.getListRoute();
+  }
+
+  @Delete('/:id')
+  @Role(ROLE.ADMIN)
+  async deleteHelicopter(@Param('id') id: string) {
+    return this.routeService.deleteRoute(+id);
+  }
 }

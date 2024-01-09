@@ -9,4 +9,4 @@ import { RouteService } from './route.service';
   controllers: [RouteController],
   exports: [RouteService, PrismaService],
 })
-export class UserModule {}
+export class RouteModule {}

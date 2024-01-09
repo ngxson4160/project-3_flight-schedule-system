@@ -1,10 +1,12 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class NewHelicopterDto {
+export class updateHelicopterDto {
   @IsString()
+  @IsOptional()
   name: string;
 
   @IsNumber()
+  @IsOptional()
   capacity: number;
 
   @IsString()

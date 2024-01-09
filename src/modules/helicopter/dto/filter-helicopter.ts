@@ -1,6 +1,6 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class NewHelicopterDto {
+export class FilterHelicopterDto {
   @IsString()
   name: string;
 
@@ -10,10 +10,6 @@ export class NewHelicopterDto {
   @IsString()
   @IsOptional()
   description: string;
-
-  @IsString()
-  @IsOptional()
-  img: string;
 
   @IsString()
   @IsOptional()
@@ -27,3 +23,12 @@ export class NewHelicopterDto {
   @IsOptional()
   speed: string;
 }
+
+export class OrderByHelicopterDto {
+    @IsNumber()
+    capacity: number;
+
+    @IsString()
+    @IsOptional()
+    speed: string;
+  }
