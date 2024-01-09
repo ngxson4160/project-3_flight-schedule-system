@@ -5,6 +5,7 @@ import { MessageResponse } from 'src/constants/message-response.constant';
 import { OrderByHelicopterDto } from './dto/filter-helicopter';
 import { SortOrder } from 'src/constants/enum.constant';
 import { FilterOptions } from 'src/common/dtos/filter-options.dto';
+import { UpdateHelicopterDto } from './dto/update-helicopter.dto';
 
 @Injectable()
 export class HelicopterService {
@@ -28,7 +29,7 @@ export class HelicopterService {
     };
   }
 
-  async updateHelicopter(id: number, newHelicopterDto: NewHelicopterDto) {
+  async updateHelicopter(id: number, updateHelicopterDto: UpdateHelicopterDto) {
     const helicopterFound = await this.prisma.helicopter.findUnique({
       where: { id },
     });
@@ -41,7 +42,7 @@ export class HelicopterService {
       where: {
         id,
       },
-      data: newHelicopterDto,
+      data: updateHelicopterDto,
     });
     return {
       message: MessageResponse.HELICOPTER.UPDATE_SUCCESS,
@@ -74,7 +75,7 @@ export class HelicopterService {
     // });
 
     const listHelicopterFound = await this.prisma.helicopter.findMany();
-    
+
     return {
       message: MessageResponse.HELICOPTER.GET_LIST_SUCCESS,
       data: listHelicopterFound,

@@ -11,7 +11,7 @@ import { HelicopterService } from './helicopter.service';
 import { NewHelicopterDto } from './dto/create-helicopter.dto';
 import { Role } from 'src/auth/decorator/role.decorator';
 import { ROLE } from '@prisma/client';
-import { updateHelicopterDto } from './dto/update-helicopter.dto';
+import { UpdateHelicopterDto,  } from './dto/update-helicopter.dto';
 
 @Controller('helicopters')
 export class HelicopterController {
@@ -26,7 +26,7 @@ export class HelicopterController {
   @Put('/:id')
   @Role(ROLE.ADMIN)
   async updateHelicopter(
-    @Body() updateHelicopterDto: updateHelicopterDto,
+    @Body() updateHelicopterDto: UpdateHelicopterDto,
     @Param('id') id: string,
   ) {
     return this.helicopterService.updateHelicopter(+id, updateHelicopterDto);

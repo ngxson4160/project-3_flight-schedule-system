@@ -1,6 +1,6 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class updateHelicopterDto {
+export class UpdateHelicopterDto {
   @IsString()
   @IsOptional()
   name: string;
