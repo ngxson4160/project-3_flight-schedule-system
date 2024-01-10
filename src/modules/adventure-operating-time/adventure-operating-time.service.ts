@@ -1,7 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { MessageResponse } from 'src/common/constants/message-response.constant';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AdventureOperatingTimeDto } from './dto/create-adventure-operating-time.dto';
+import {
+  CreateAdventureOperatingTimeDto,
+  UpdateAdventureOperatingTimeDto,
+} from './dto/create-adventure-operating-time.dto';
 import { FGetListAdventureOperatingTimeDto } from './dto/get-list-adventure-operating-time.dto';
 
 @Injectable()
@@ -9,7 +12,7 @@ export class AdventureOperatingTimeService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createAdventureOperatingTime(
-    adventureOperatingTime: AdventureOperatingTimeDto,
+    adventureOperatingTime: CreateAdventureOperatingTimeDto,
   ) {
     if (
       (adventureOperatingTime!.startMorning &&
@@ -69,7 +72,7 @@ export class AdventureOperatingTimeService {
 
   async updateAdventureOperatingTime(
     id: number,
-    adventureOperatingTime: AdventureOperatingTimeDto,
+    adventureOperatingTime: UpdateAdventureOperatingTimeDto,
   ) {
     if (
       (adventureOperatingTime!.startMorning &&
@@ -117,15 +120,22 @@ export class AdventureOperatingTimeService {
       );
     }
 
+    let dataUpdate = {};
+    if (adventureOperatingTime?.date) {
+      dataUpdate = {
+        ...adventureOperatingTime,
+        date: new Date(adventureOperatingTime?.date),
+      };
+    } else {
+      dataUpdate = adventureOperatingTime;
+    }
+
     const adventureOperatingTimeUpdate =
       await this.prisma.adventureOperatingTime.update({
         where: {
           id,
         },
-        data: {
-          ...adventureOperatingTime,
-          date: new Date(adventureOperatingTime.date),
-        },
+        data: dataUpdate,
       });
     return {
       message: MessageResponse.ADVENTURE_OPERATING_TIME.UPDATE_SUCCESS,

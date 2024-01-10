@@ -46,4 +46,14 @@ export const MessageResponse = {
     GET_LIST_SUCCESS: 'Get list adventure operating time successfully',
     DELETE_SUCCESS: 'Delete adventure operating time successfully',
   },
+  WORK_SCHEDULE: {
+    CREATE_SUCCESS: 'Create work schedule time time successfully!',
+    ERROR_DATE: 'Must fill in start and end times',
+    NOT_EXIST: 'Work schedule time time not exist!',
+    UPDATE_SUCCESS: 'Update work schedule time successfully',
+    GET_LIST_SUCCESS: 'Get list work schedule time successfully',
+    DELETE_SUCCESS: 'Delete work schedule time successfully',
+    REQUEST_UPDATE_SUCCESS:
+      'Request update work schedule time successfully, please wait for an admin to process',
+  },
 };

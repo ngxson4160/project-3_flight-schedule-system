@@ -163,9 +163,10 @@ model WorkSchedule {
     userId Int  @map("user_id")
     user   User @relation(fields: [userId], references: [id])
 
-    startTime String?
-    endTime   String?
+    startTime String
+    endTime   String
     date      DateTime @db.Timestamp(0)
+    parentId  Int?     @map("parent_id")
 
     @@map("work_schedule")
 }

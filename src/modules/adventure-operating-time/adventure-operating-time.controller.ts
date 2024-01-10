@@ -10,7 +10,10 @@ import {
 import { AdventureOperatingTimeService } from './adventure-operating-time.service';
 import { Role } from 'src/auth/decorator/role.decorator';
 import { ROLE } from '@prisma/client';
-import { AdventureOperatingTimeDto } from './dto/create-adventure-operating-time.dto';
+import {
+  CreateAdventureOperatingTimeDto,
+  UpdateAdventureOperatingTimeDto,
+} from './dto/create-adventure-operating-time.dto';
 import { FGetListAdventureOperatingTimeDto } from './dto/get-list-adventure-operating-time.dto';
 
 @Controller('adventure-operating-times')
@@ -23,7 +26,7 @@ export class AdventureOperatingTimeController {
   @Role(ROLE.ADMIN)
   async createHelicopter(
     @Body()
-    adventureOperatingTime: AdventureOperatingTimeDto,
+    adventureOperatingTime: CreateAdventureOperatingTimeDto,
   ) {
     return this.adventureOperatingTimeService.createAdventureOperatingTime(
       adventureOperatingTime,
@@ -33,7 +36,7 @@ export class AdventureOperatingTimeController {
   @Put('/:id')
   @Role(ROLE.ADMIN)
   async updateAdventureOperatingTime(
-    @Body() updateAdventureOperatingTime: AdventureOperatingTimeDto,
+    @Body() updateAdventureOperatingTime: UpdateAdventureOperatingTimeDto,
     @Param('id') id: string,
   ) {
     return this.adventureOperatingTimeService.updateAdventureOperatingTime(
