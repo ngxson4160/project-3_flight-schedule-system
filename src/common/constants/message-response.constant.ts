@@ -55,5 +55,6 @@ export const MessageResponse = {
     DELETE_SUCCESS: 'Delete work schedule time successfully',
     REQUEST_UPDATE_SUCCESS:
       'Request update work schedule time successfully, please wait for an admin to process',
+    REQUEST_UPDATE_NOT_EXIST: 'Request update work schedule not exist',
   },
 };

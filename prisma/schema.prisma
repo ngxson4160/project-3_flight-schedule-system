@@ -17,6 +17,7 @@ enum ROLE {
     ADMIN
     PILOT
     TOUR_GUIDE
+    CUSTOMER
 }
 
 enum ROUTE_TYPE {
@@ -24,6 +25,18 @@ enum ROUTE_TYPE {
     TRAINING
     REGULAR
     TEST
+}
+
+enum WORK_SCHEDULE_STATUS {
+    PENDING_UPDATE
+    ACCEPT_UPDATE
+    REJECT_UPDATE
+}
+
+enum FLIGHT_SCHEDULE_STATUS {
+    PENDING_HIRE
+    ACCEPT_HIRE
+    REJECT_HIRE
 }
 
 model User {
@@ -46,8 +59,10 @@ model User {
     refreshToken String?   @map("refresh_token") @db.VarChar(500)
     role         ROLE
 
-    userFlightSchedule UserFlightSchedule[]
-    workSchedule       WorkSchedule[]
+    userFlightSchedule            UserFlightSchedule[]
+    workSchedule                  WorkSchedule[]
+    noteRequestChangeWorkSchedule NoteRequestChangeWorkSchedule[]
+    noteRequestHireHelicopter     NoteRequestHireHelicopter[]
 
     userRole UserRole[]
 
@@ -120,12 +135,13 @@ model Route {
 }
 
 model FlightSchedule {
-    id       Int       @id @default(autoincrement())
-    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
-    createBy Int?      @map("create_by")
-    isDelete Int?      @default(0) @map("is_delete")
-    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
-    updateBy Int?      @map("update_by")
+    id       Int                     @id @default(autoincrement())
+    createAt DateTime?               @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?                    @map("create_by")
+    isDelete Int?                    @default(0) @map("is_delete")
+    updateAt DateTime?               @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?                    @map("update_by")
+    status   FLIGHT_SCHEDULE_STATUS?
 
     routeId      Int        @map("route_id")
     helicopterId Int        @map("helicopter_id")
@@ -137,7 +153,8 @@ model FlightSchedule {
     end      DateTime
     duration Int
 
-    userFlightSchedule UserFlightSchedule[]
+    userFlightSchedule        UserFlightSchedule[]
+    NoteRequestHireHelicopter NoteRequestHireHelicopter[]
 
     @@map("flight_schedule")
 }
@@ -163,10 +180,12 @@ model WorkSchedule {
     userId Int  @map("user_id")
     user   User @relation(fields: [userId], references: [id])
 
-    startTime String
-    endTime   String
-    date      DateTime @db.Timestamp(0)
-    parentId  Int?     @map("parent_id")
+    startTime                     String
+    endTime                       String
+    date                          DateTime                        @db.Timestamp(0)
+    parentId                      Int?                            @map("parent_id")
+    status                        WORK_SCHEDULE_STATUS?
+    NoteRequestChangeWorkSchedule NoteRequestChangeWorkSchedule[]
 
     @@map("work_schedule")
 }
@@ -189,6 +208,8 @@ model Helicopter {
     speed       String?
 
     flightSchedule FlightSchedule[]
+
+    @@map("helicopter")
 }
 
 model AdventureOperatingTime {
@@ -207,4 +228,42 @@ model AdventureOperatingTime {
     startAfternoon String?
     endAfternoon   String?
     date           DateTime @db.Timestamp(0)
+
+    @@map("adventure_operating_time")
+}
+
+model NoteRequestChangeWorkSchedule {
+    id       Int       @id @default(autoincrement())
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
+
+    userId         Int          @map("user_id")
+    user           User         @relation(fields: [userId], references: [id])
+    workScheduleId Int          @unique() @map("work_schedule_id")
+    workSchedule   WorkSchedule @relation(fields: [workScheduleId], references: [id])
+
+    message String
+
+    @@map("note_request_change_work_schedule")
+}
+
+model NoteRequestHireHelicopter {
+    id       Int       @id @default(autoincrement())
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
+
+    userId           Int            @map("user_id")
+    user             User           @relation(fields: [userId], references: [id])
+    flightScheduleId Int            @unique() @map("flight_schedule_id")
+    workSchedule     FlightSchedule @relation(fields: [flightScheduleId], references: [id])
+
+    message String
+
+    @@map("note_request_hire_helicopter")
 }
