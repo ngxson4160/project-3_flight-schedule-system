@@ -49,7 +49,10 @@ export const MessageResponse = {
   WORK_SCHEDULE: {
     CREATE_SUCCESS: 'Create work schedule time time successfully!',
     ERROR_DATE: 'Must fill in start and end times',
-    NOT_EXIST: 'Work schedule time time not exist!',
+    NOT_EXIST: 'Work schedule time not exist!',
+    NOT_EXIST_WITH_USER(workScheduleId: number, userId: number) {
+      return `Work schedule time have id ${workScheduleId} not found with user id ${userId}!`;
+    },
     UPDATE_SUCCESS: 'Update work schedule time successfully',
     GET_LIST_SUCCESS: 'Get list work schedule time successfully',
     DELETE_SUCCESS: 'Delete work schedule time successfully',

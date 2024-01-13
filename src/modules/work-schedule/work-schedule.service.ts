@@ -83,7 +83,7 @@ export class WorkScheduleService {
   }
 
   async getListWorkSchedule(filter: FGetListWorkScheduleDto) {
-    // const listadventureOperatingTimeFound = await this.prisma.adventureOperatingTime.findMany({
+    // const listAdventureOperatingTimeFound = await this.prisma.adventureOperatingTime.findMany({
     //   skip: (filter.page - 1) * filter.perPage,
     //   take: filter.perPage,
     //   orderBy: {

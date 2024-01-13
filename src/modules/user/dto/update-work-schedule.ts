@@ -31,4 +31,7 @@ export class UpdateWorkScheduleDto {
   @IsISO8601()
   @IsOptional()
   date?: Date;
+
+  @IsOptional()
+  reason?: string;
 }

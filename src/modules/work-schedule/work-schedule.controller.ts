@@ -14,7 +14,6 @@ import {
   CreateWorkScheduleDto,
   UpdateWorkScheduleDto,
 } from './dto/create-work-schedule.dto';
-import { UserData } from 'src/auth/decorator/user-info.decorator';
 import { FGetListWorkScheduleDto } from './dto/get-list-work-schedule.dto';
 
 @Controller('work-schedules')
@@ -32,7 +31,7 @@ export class WorkScheduleController {
 
   @Put('/:id')
   @Role(ROLE.ADMIN)
-  async updateWorkScheduleService(
+  async updateWorkSchedule(
     @Body() updateWorkScheduleDto: UpdateWorkScheduleDto,
     @Param('id') id: string,
   ) {
@@ -43,10 +42,8 @@ export class WorkScheduleController {
   }
 
   @Get()
-  async getListWorkScheduleService(
-    @Body() getWorkScheduleService: FGetListWorkScheduleDto,
-  ) {
-    return this.workScheduleService.getListWorkSchedule(getWorkScheduleService);
+  async getListWorkSchedule(@Body() getWorkSchedule: FGetListWorkScheduleDto) {
+    return this.workScheduleService.getListWorkSchedule(getWorkSchedule);
   }
 
   @Delete('/:id')

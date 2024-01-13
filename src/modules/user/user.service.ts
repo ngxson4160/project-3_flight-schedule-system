@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { MessageResponse } from 'src/common/constants/message-response.constant';
 import { FGetListWorkScheduleDto } from '../work-schedule/dto/get-list-work-schedule.dto';
 import { UpdateWorkScheduleDto } from './dto/update-work-schedule';
+import { WORK_SCHEDULE_STATUS } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -59,6 +60,7 @@ export class UserService {
     userId: number,
     workScheduleId: number,
     updateWorkSchedule: UpdateWorkScheduleDto,
+    reason?: string,
   ) {
     const userFound = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -72,7 +74,12 @@ export class UserService {
     });
 
     if (!workScheduleFound) {
-      throw new BadRequestException(MessageResponse.WORK_SCHEDULE.NOT_EXIST);
+      throw new BadRequestException(
+        MessageResponse.WORK_SCHEDULE.NOT_EXIST_WITH_USER(
+          workScheduleId,
+          userId,
+        ),
+      );
     }
 
     if (updateWorkSchedule?.date) {
@@ -82,6 +89,24 @@ export class UserService {
     const workScheduleChildFound = await this.prisma.workSchedule.findFirst({
       where: { parentId: workScheduleId },
     });
+
+    if (updateWorkSchedule.reason) {
+      const noteRequestChangeFound =
+        await this.prisma.noteRequestChangeWorkSchedule.findFirst({
+          where: { workScheduleId: workScheduleFound.id, userId },
+        });
+      if (noteRequestChangeFound) {
+        await this.prisma.noteRequestChangeWorkSchedule.update({
+          where: { id: noteRequestChangeFound.id },
+          data: { message: updateWorkSchedule.reason },
+        });
+      } else {
+        await this.prisma.noteRequestChangeWorkSchedule.create({
+          data: { userId, workScheduleId, message: updateWorkSchedule.reason },
+        });
+      }
+      delete updateWorkSchedule.reason;
+    }
 
     if (workScheduleChildFound) {
       const updateWorkScheduleChild = await this.prisma.workSchedule.update({
@@ -105,7 +130,10 @@ export class UserService {
     };
 
     const newWorkScheduleChild = await this.prisma.workSchedule.create({
-      data: createWorkScheduleChild,
+      data: {
+        ...createWorkScheduleChild,
+        status: WORK_SCHEDULE_STATUS.PENDING_UPDATE,
+      },
     });
 
     return {
@@ -113,4 +141,8 @@ export class UserService {
       data: newWorkScheduleChild,
     };
   }
+
+  // async getRequestUpdateWorkSchedule(){
+
+  // }
 }

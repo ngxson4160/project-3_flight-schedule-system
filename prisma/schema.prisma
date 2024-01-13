@@ -28,6 +28,7 @@ enum ROUTE_TYPE {
 }
 
 enum WORK_SCHEDULE_STATUS {
+    APPLY
     PENDING_UPDATE
     ACCEPT_UPDATE
     REJECT_UPDATE
@@ -184,7 +185,7 @@ model WorkSchedule {
     endTime                       String
     date                          DateTime                        @db.Timestamp(0)
     parentId                      Int?                            @map("parent_id")
-    status                        WORK_SCHEDULE_STATUS?
+    status                        WORK_SCHEDULE_STATUS?           @default(APPLY)
     NoteRequestChangeWorkSchedule NoteRequestChangeWorkSchedule[]
 
     @@map("work_schedule")
