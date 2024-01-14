@@ -6,6 +6,7 @@ import {
   UpdateAdventureOperatingTimeDto,
 } from './dto/create-adventure-operating-time.dto';
 import { FGetListAdventureOperatingTimeDto } from './dto/get-list-adventure-operating-time.dto';
+import { checkValidTime } from 'src/utils/function.utils';
 
 @Injectable()
 export class AdventureOperatingTimeService {
@@ -205,17 +206,3 @@ export class AdventureOperatingTimeService {
     };
   }
 }
-
-const checkValidTime = (startTime: string, endTime: string) => {
-  const hourStart = startTime.slice(0, 2);
-  const minusStart = startTime.slice(3, 5);
-
-  const hourEnd = endTime.slice(0, 2);
-  const minusEnd = endTime.slice(3, 5);
-
-  if (hourStart > hourEnd || (hourStart == hourEnd && minusStart >= minusEnd)) {
-    throw new BadRequestException(
-      MessageResponse.COMMON.INVALID_TIME_START_AND_END,
-    );
-  }
-};

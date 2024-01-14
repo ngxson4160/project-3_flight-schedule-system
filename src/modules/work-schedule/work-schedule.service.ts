@@ -9,6 +9,7 @@ import {
 } from './dto/create-work-schedule.dto';
 import { FGetListWorkScheduleDto } from './dto/get-list-work-schedule.dto';
 import { WORK_SCHEDULE_STATUS } from '@prisma/client';
+import { checkValidTime } from 'src/utils/function.utils';
 
 @Injectable()
 export class WorkScheduleService {
@@ -367,17 +368,3 @@ export class WorkScheduleService {
     };
   }
 }
-
-const checkValidTime = (startTime: string, endTime: string) => {
-  const hourStart = startTime.slice(0, 2);
-  const minusStart = startTime.slice(3, 5);
-
-  const hourEnd = endTime.slice(0, 2);
-  const minusEnd = endTime.slice(3, 5);
-
-  if (hourStart > hourEnd || (hourStart == hourEnd && minusStart >= minusEnd)) {
-    throw new BadRequestException(
-      MessageResponse.COMMON.INVALID_TIME_START_AND_END,
-    );
-  }
-};
