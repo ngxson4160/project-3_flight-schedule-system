@@ -3,9 +3,12 @@ import { MessageResponse } from 'src/common/constants/message-response.constant'
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   CreateWorkScheduleDto,
+  RequestUpdateWorkScheduleDto,
+  ResolveUpdateWorkScheduleDto,
   UpdateWorkScheduleDto,
 } from './dto/create-work-schedule.dto';
 import { FGetListWorkScheduleDto } from './dto/get-list-work-schedule.dto';
+import { WORK_SCHEDULE_STATUS } from '@prisma/client';
 
 @Injectable()
 export class WorkScheduleService {
@@ -139,6 +142,228 @@ export class WorkScheduleService {
     return {
       message: MessageResponse.WORK_SCHEDULE.DELETE_SUCCESS,
       data: deleteWorkSchedule,
+    };
+  }
+
+  async getDetailWorkSchedule(workScheduleId: number) {
+    const workScheduleFound = await this.prisma.workSchedule.findFirst({
+      where: {
+        id: workScheduleId,
+        OR: [
+          { status: WORK_SCHEDULE_STATUS.APPLY },
+          { status: WORK_SCHEDULE_STATUS.ORIGINAL },
+        ],
+      },
+    });
+
+    if (!workScheduleFound) {
+      throw new BadRequestException(MessageResponse.WORK_SCHEDULE.NOT_EXIST);
+    }
+
+    const workScheduleChildFound = await this.prisma.workSchedule.findFirst({
+      where: { parentId: workScheduleId },
+    });
+
+    let noteRequestChangeFound;
+
+    if (workScheduleChildFound) {
+      noteRequestChangeFound =
+        await this.prisma.noteRequestChangeWorkSchedule.findFirst({
+          where: { workScheduleId: workScheduleChildFound.id },
+        });
+    }
+
+    return {
+      message: MessageResponse.WORK_SCHEDULE.GET_DETAIL_SUCCESS,
+      data: {
+        workSchedule: workScheduleFound,
+        workScheduleUpdate: {
+          ...workScheduleChildFound,
+          reasonUpdate: noteRequestChangeFound?.message,
+        },
+      },
+    };
+  }
+
+  async requestUpdateWorkSchedule(
+    userId: number,
+    workScheduleId: number,
+    updateWorkSchedule: RequestUpdateWorkScheduleDto,
+  ) {
+    const userFound = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!userFound) {
+      throw new BadRequestException(MessageResponse.USER.NOT_EXIST);
+    }
+    const workScheduleFound = await this.prisma.workSchedule.findFirst({
+      where: {
+        id: workScheduleId,
+        userId,
+        OR: [
+          { status: WORK_SCHEDULE_STATUS.APPLY },
+          { status: WORK_SCHEDULE_STATUS.ORIGINAL },
+        ],
+      },
+    });
+
+    if (!workScheduleFound) {
+      throw new BadRequestException(
+        MessageResponse.WORK_SCHEDULE.NOT_EXIST_WITH_USER(
+          workScheduleId,
+          userId,
+        ),
+      );
+    }
+
+    const validDateUpdate = workScheduleFound.date;
+    validDateUpdate.setDate(validDateUpdate.getDate() - 1);
+    if (new Date() > validDateUpdate) {
+      throw new BadRequestException(
+        MessageResponse.WORK_SCHEDULE.EXPIRED_DATE_REQUEST_UPDATE,
+      );
+    }
+
+    const workScheduleChildFound = await this.prisma.workSchedule.findFirst({
+      where: { parentId: workScheduleId },
+    });
+
+    let workScheduleChildUpdate;
+
+    if (workScheduleChildFound) {
+      if (updateWorkSchedule.reason) {
+        const noteRequestChangeFound =
+          await this.prisma.noteRequestChangeWorkSchedule.findFirst({
+            where: { workScheduleId: workScheduleChildFound.id, userId },
+          });
+        if (noteRequestChangeFound) {
+          await this.prisma.noteRequestChangeWorkSchedule.update({
+            where: { id: noteRequestChangeFound.id },
+            data: { message: updateWorkSchedule.reason },
+          });
+        } else {
+          await this.prisma.noteRequestChangeWorkSchedule.create({
+            data: {
+              userId,
+              workScheduleId: workScheduleChildFound.id,
+              message: updateWorkSchedule.reason,
+            },
+          });
+        }
+        delete updateWorkSchedule.reason;
+      }
+      workScheduleChildUpdate = await this.prisma.workSchedule.update({
+        where: { id: workScheduleChildFound.id },
+        data: updateWorkSchedule,
+      });
+    } else {
+      const parentId = workScheduleFound.id;
+      const reason = updateWorkSchedule.reason;
+      delete updateWorkSchedule.reason;
+      delete workScheduleFound.id;
+      delete workScheduleFound.createAt;
+      delete workScheduleFound.updateAt;
+      const createWorkScheduleChild = {
+        ...workScheduleFound,
+        ...updateWorkSchedule,
+        parentId,
+      };
+
+      workScheduleChildUpdate = await this.prisma.workSchedule.create({
+        data: {
+          ...createWorkScheduleChild,
+          status: WORK_SCHEDULE_STATUS.PENDING_UPDATE,
+        },
+      });
+
+      if (reason) {
+        await this.prisma.noteRequestChangeWorkSchedule.create({
+          data: {
+            userId,
+            workScheduleId: workScheduleChildUpdate.id,
+            message: reason,
+          },
+        });
+      }
+    }
+
+    return {
+      message: MessageResponse.WORK_SCHEDULE.REQUEST_UPDATE_SUCCESS,
+      data: workScheduleChildUpdate,
+    };
+  }
+
+  async resolveUpdateWorkSchedule(
+    id: number,
+    userId: number,
+    resolveUpdateWorkSchedule: ResolveUpdateWorkScheduleDto,
+  ) {
+    const workScheduleFound = await this.prisma.workSchedule.findFirst({
+      where: {
+        id,
+        OR: [
+          { status: WORK_SCHEDULE_STATUS.APPLY },
+          { status: WORK_SCHEDULE_STATUS.ORIGINAL },
+        ],
+      },
+    });
+    if (!workScheduleFound) {
+      throw new BadRequestException(MessageResponse.WORK_SCHEDULE.NOT_EXIST);
+    }
+
+    const workScheduleChildFound = await this.prisma.workSchedule.findFirst({
+      where: { parentId: id },
+    });
+    if (!workScheduleChildFound) {
+      throw new BadRequestException(
+        MessageResponse.WORK_SCHEDULE.REQUEST_UPDATE_NOT_EXIST,
+      );
+    }
+
+    if (resolveUpdateWorkSchedule?.reason) {
+      const noteRequestChangeFound =
+        await this.prisma.noteRequestChangeWorkSchedule.findFirst({
+          where: { workScheduleId: workScheduleChildFound.id, userId },
+        });
+      if (noteRequestChangeFound) {
+        await this.prisma.noteRequestChangeWorkSchedule.update({
+          where: { id: noteRequestChangeFound.id },
+          data: { message: resolveUpdateWorkSchedule.reason },
+        });
+      } else {
+        await this.prisma.noteRequestChangeWorkSchedule.create({
+          data: {
+            userId,
+            workScheduleId: workScheduleChildFound.id,
+            message: resolveUpdateWorkSchedule.reason,
+          },
+        });
+      }
+    }
+
+    if (resolveUpdateWorkSchedule.isAccept) {
+      await this.prisma.workSchedule.update({
+        where: { id: workScheduleChildFound.id },
+        data: { status: WORK_SCHEDULE_STATUS.APPLY },
+      });
+      await this.prisma.workSchedule.update({
+        where: { id },
+        data: { status: WORK_SCHEDULE_STATUS.ORIGINAL },
+      });
+    } else {
+      await this.prisma.workSchedule.update({
+        where: { id: workScheduleChildFound.id },
+        data: { status: WORK_SCHEDULE_STATUS.REJECT_UPDATE },
+      });
+      await this.prisma.workSchedule.update({
+        where: { id },
+        data: { status: WORK_SCHEDULE_STATUS.APPLY },
+      });
+    }
+
+    return {
+      message: MessageResponse.WORK_SCHEDULE.Resolve_UPDATE_SUCCESS,
     };
   }
 }

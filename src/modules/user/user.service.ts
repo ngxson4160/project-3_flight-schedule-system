@@ -56,93 +56,136 @@ export class UserService {
     };
   }
 
-  async requestUpdateWorkSchedule(
-    userId: number,
-    workScheduleId: number,
-    updateWorkSchedule: UpdateWorkScheduleDto,
-    reason?: string,
-  ) {
-    const userFound = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
+  // async requestUpdateWorkSchedule(
+  //   userId: number,
+  //   workScheduleId: number,
+  //   updateWorkSchedule: UpdateWorkScheduleDto,
+  // ) {
+  //   const userFound = await this.prisma.user.findUnique({
+  //     where: { id: userId },
+  //   });
 
-    if (!userFound) {
-      throw new BadRequestException(MessageResponse.USER.NOT_EXIST);
-    }
-    const workScheduleFound = await this.prisma.workSchedule.findFirst({
-      where: { id: workScheduleId, userId },
-    });
+  //   if (!userFound) {
+  //     throw new BadRequestException(MessageResponse.USER.NOT_EXIST);
+  //   }
+  //   const workScheduleFound = await this.prisma.workSchedule.findFirst({
+  //     where: { id: workScheduleId, userId },
+  //   });
 
-    if (!workScheduleFound) {
-      throw new BadRequestException(
-        MessageResponse.WORK_SCHEDULE.NOT_EXIST_WITH_USER(
-          workScheduleId,
-          userId,
-        ),
-      );
-    }
+  //   if (!workScheduleFound) {
+  //     throw new BadRequestException(
+  //       MessageResponse.WORK_SCHEDULE.NOT_EXIST_WITH_USER(
+  //         workScheduleId,
+  //         userId,
+  //       ),
+  //     );
+  //   }
 
-    if (updateWorkSchedule?.date) {
-      updateWorkSchedule.date = new Date(updateWorkSchedule.date);
-    }
+  //   if (updateWorkSchedule?.date) {
+  //     updateWorkSchedule.date = new Date(updateWorkSchedule.date);
+  //   }
 
-    const workScheduleChildFound = await this.prisma.workSchedule.findFirst({
-      where: { parentId: workScheduleId },
-    });
+  //   const workScheduleChildFound = await this.prisma.workSchedule.findFirst({
+  //     where: { parentId: workScheduleId },
+  //   });
 
-    if (updateWorkSchedule.reason) {
-      const noteRequestChangeFound =
-        await this.prisma.noteRequestChangeWorkSchedule.findFirst({
-          where: { workScheduleId: workScheduleFound.id, userId },
-        });
-      if (noteRequestChangeFound) {
-        await this.prisma.noteRequestChangeWorkSchedule.update({
-          where: { id: noteRequestChangeFound.id },
-          data: { message: updateWorkSchedule.reason },
-        });
-      } else {
-        await this.prisma.noteRequestChangeWorkSchedule.create({
-          data: { userId, workScheduleId, message: updateWorkSchedule.reason },
-        });
-      }
-      delete updateWorkSchedule.reason;
-    }
+  //   if (updateWorkSchedule.reason) {
+  //     const noteRequestChangeFound =
+  //       await this.prisma.noteRequestChangeWorkSchedule.findFirst({
+  //         where: { workScheduleId: workScheduleChildFound.id, userId },
+  //       });
+  //     if (noteRequestChangeFound) {
+  //       await this.prisma.noteRequestChangeWorkSchedule.update({
+  //         where: { id: noteRequestChangeFound.id },
+  //         data: { message: updateWorkSchedule.reason },
+  //       });
+  //     } else {
+  //       await this.prisma.noteRequestChangeWorkSchedule.create({
+  //         data: {
+  //           userId,
+  //           workScheduleId: workScheduleChildFound.id,
+  //           message: updateWorkSchedule.reason,
+  //         },
+  //       });
+  //     }
+  //     delete updateWorkSchedule.reason;
+  //   }
 
-    if (workScheduleChildFound) {
-      const updateWorkScheduleChild = await this.prisma.workSchedule.update({
-        where: { id: workScheduleChildFound.id },
-        data: updateWorkSchedule,
-      });
-      return {
-        message: MessageResponse.WORK_SCHEDULE.REQUEST_UPDATE_SUCCESS,
-        data: updateWorkScheduleChild,
-      };
-    }
+  //   if (workScheduleChildFound) {
+  //     const updateWorkScheduleChild = await this.prisma.workSchedule.update({
+  //       where: { id: workScheduleChildFound.id },
+  //       data: updateWorkSchedule,
+  //     });
+  //     return {
+  //       message: MessageResponse.WORK_SCHEDULE.REQUEST_UPDATE_SUCCESS,
+  //       data: updateWorkScheduleChild,
+  //     };
+  //   }
 
-    const parentId = workScheduleFound.id;
-    delete workScheduleFound.id;
-    delete workScheduleFound.createAt;
-    delete workScheduleFound.updateAt;
-    const createWorkScheduleChild = {
-      ...workScheduleFound,
-      ...updateWorkSchedule,
-      parentId,
-    };
+  //   const parentId = workScheduleFound.id;
+  //   delete workScheduleFound.id;
+  //   delete workScheduleFound.createAt;
+  //   delete workScheduleFound.updateAt;
+  //   const createWorkScheduleChild = {
+  //     ...workScheduleFound,
+  //     ...updateWorkSchedule,
+  //     parentId,
+  //   };
 
-    const newWorkScheduleChild = await this.prisma.workSchedule.create({
-      data: {
-        ...createWorkScheduleChild,
-        status: WORK_SCHEDULE_STATUS.PENDING_UPDATE,
-      },
-    });
+  //   const newWorkScheduleChild = await this.prisma.workSchedule.create({
+  //     data: {
+  //       ...createWorkScheduleChild,
+  //       status: WORK_SCHEDULE_STATUS.PENDING_UPDATE,
+  //     },
+  //   });
 
-    return {
-      message: MessageResponse.WORK_SCHEDULE.REQUEST_UPDATE_SUCCESS,
-      data: newWorkScheduleChild,
-    };
-  }
+  //   if (updateWorkSchedule.reason) {
+  //     await this.prisma.noteRequestChangeWorkSchedule.create({
+  //       data: {
+  //         userId,
+  //         workScheduleId: newWorkScheduleChild.id,
+  //         message: updateWorkSchedule.reason,
+  //       },
+  //     });
+  //   }
 
-  // async getRequestUpdateWorkSchedule(){
+  //   return {
+  //     message: MessageResponse.WORK_SCHEDULE.REQUEST_UPDATE_SUCCESS,
+  //     data: newWorkScheduleChild,
+  //   };
+  // }
 
+  // async getWorkSchedule(workScheduleId: number) {
+  //   const workScheduleFound = await this.prisma.workSchedule.findFirst({
+  //     where: { id: workScheduleId, status: WORK_SCHEDULE_STATUS.APPLY },
+  //   });
+
+  //   if (!workScheduleFound) {
+  //     throw new BadRequestException(MessageResponse.WORK_SCHEDULE.NOT_EXIST);
+  //   }
+
+  //   const workScheduleChildFound = await this.prisma.workSchedule.findFirst({
+  //     where: { parentId: workScheduleId },
+  //   });
+
+  //   let noteRequestChangeFound;
+
+  //   if (workScheduleChildFound) {
+  //     noteRequestChangeFound =
+  //       await this.prisma.noteRequestChangeWorkSchedule.findFirst({
+  //         where: { workScheduleId: workScheduleChildFound.id },
+  //       });
+  //   }
+
+  //   return {
+  //     message: MessageResponse.WORK_SCHEDULE.GET_DETAIL_SUCCESS,
+  //     data: {
+  //       workSchedule: workScheduleFound,
+  //       workScheduleUpdate: {
+  //         ...workScheduleChildFound,
+  //         reasonUpdate: noteRequestChangeFound?.message,
+  //       },
+  //     },
+  //   };
   // }
 }

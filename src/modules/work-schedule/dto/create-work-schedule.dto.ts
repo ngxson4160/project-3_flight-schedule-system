@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsISO8601,
   IsNumber,
   IsOptional,
@@ -60,4 +61,45 @@ export class UpdateWorkScheduleDto {
   @IsISO8601()
   @IsOptional()
   date: Date;
+}
+
+export class RequestUpdateWorkScheduleDto {
+  @IsString()
+  @Matches(RegexConstant.TimeReg_HH_MM, {
+    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  })
+  @IsOptional()
+  startTime?: string;
+
+  @IsString()
+  @Matches(RegexConstant.TimeReg_HH_MM, {
+    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  })
+  @IsOptional()
+  endTime?: string;
+
+  @IsOptional()
+  reason?: string;
+}
+
+export class ResolveUpdateWorkScheduleDto {
+  @IsBoolean()
+  isAccept: boolean;
+
+  @IsString()
+  @Matches(RegexConstant.TimeReg_HH_MM, {
+    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  })
+  @IsOptional()
+  startTime?: string;
+
+  @IsString()
+  @Matches(RegexConstant.TimeReg_HH_MM, {
+    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  })
+  @IsOptional()
+  endTime?: string;
+
+  @IsOptional()
+  reason?: string;
 }

@@ -29,8 +29,8 @@ enum ROUTE_TYPE {
 
 enum WORK_SCHEDULE_STATUS {
     APPLY
+    ORIGINAL
     PENDING_UPDATE
-    ACCEPT_UPDATE
     REJECT_UPDATE
 }
 
@@ -243,7 +243,7 @@ model NoteRequestChangeWorkSchedule {
 
     userId         Int          @map("user_id")
     user           User         @relation(fields: [userId], references: [id])
-    workScheduleId Int          @unique() @map("work_schedule_id")
+    workScheduleId Int          @map("work_schedule_id")
     workSchedule   WorkSchedule @relation(fields: [workScheduleId], references: [id])
 
     message String

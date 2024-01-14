@@ -23,17 +23,23 @@ export class UserController {
     );
   }
 
-  @Put('/work-schedule/:id')
-  @Role(ROLE.PILOT, ROLE.ADMIN, ROLE.TOUR_GUIDE)
-  async requestUpdateWorkSchedule(
-    @Body() updateWorkSchedule: UpdateWorkScheduleDto,
-    @UserData() userInfo: UserDataType,
-    @Param('id') workScheduleId: string,
-  ) {
-    return this.userService.requestUpdateWorkSchedule(
-      userInfo.id,
-      +workScheduleId,
-      updateWorkSchedule,
-    );
-  }
+  // @Put('/work-schedule/:id')
+  // @Role(ROLE.PILOT, ROLE.ADMIN, ROLE.TOUR_GUIDE)
+  // async requestUpdateWorkSchedule(
+  //   @Body() updateWorkSchedule: UpdateWorkScheduleDto,
+  //   @UserData() userInfo: UserDataType,
+  //   @Param('id') workScheduleId: string,
+  // ) {
+  //   return this.userService.requestUpdateWorkSchedule(
+  //     userInfo.id,
+  //     +workScheduleId,
+  //     updateWorkSchedule,
+  //   );
+  // }
+
+  // @Get('/work-schedule/:id')
+  // @Role(ROLE.PILOT, ROLE.ADMIN, ROLE.TOUR_GUIDE)
+  // async getWorkSchedule(@Param('id') workScheduleId: string) {
+  //   return this.userService.getWorkSchedule(+workScheduleId);
+  // }
 }

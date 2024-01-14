@@ -55,9 +55,13 @@ export const MessageResponse = {
     },
     UPDATE_SUCCESS: 'Update work schedule time successfully',
     GET_LIST_SUCCESS: 'Get list work schedule time successfully',
+    GET_DETAIL_SUCCESS: 'Get detail work schedule time successfully',
     DELETE_SUCCESS: 'Delete work schedule time successfully',
+    REQUEST_UPDATE_NOT_EXIST: 'Request update work schedule not exist',
     REQUEST_UPDATE_SUCCESS:
       'Request update work schedule time successfully, please wait for an admin to process',
-    REQUEST_UPDATE_NOT_EXIST: 'Request update work schedule not exist',
+    Resolve_UPDATE_SUCCESS: 'Resolve update work schedule time successfully',
+    EXPIRED_DATE_REQUEST_UPDATE:
+      'The time to update the work schedule has expired',
   },
 };
