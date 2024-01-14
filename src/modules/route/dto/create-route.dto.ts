@@ -15,6 +15,9 @@ export class CreateRouteDto {
   @IsNumber()
   duration: number;
 
+  @IsNumber()
+  price: number;
+
   @IsEnum(ROUTE_TYPE)
   type: ROUTE_TYPE;
 }

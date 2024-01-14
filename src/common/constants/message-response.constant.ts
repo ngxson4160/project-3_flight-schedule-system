@@ -12,6 +12,9 @@ export const MessageResponse = {
     },
     EXIST: 'User exist!',
     NOT_EXIST: 'User not exist!',
+    CUSTOMER_NOT_EXIST: 'Customer not exist!',
+    PILOT_NOT_EXIST: 'Pilot not exist!',
+    TOUR_GUIDE_NOT_EXIST: 'Tour guide not exist!',
   },
 
   AUTH: {
@@ -46,6 +49,7 @@ export const MessageResponse = {
     GET_LIST_SUCCESS: 'Get list adventure operating time successfully',
     DELETE_SUCCESS: 'Delete adventure operating time successfully',
   },
+
   WORK_SCHEDULE: {
     CREATE_SUCCESS: 'Create work schedule time time successfully!',
     ERROR_DATE: 'Must fill in start and end times',
@@ -63,5 +67,19 @@ export const MessageResponse = {
     Resolve_UPDATE_SUCCESS: 'Resolve update work schedule time successfully',
     EXPIRED_DATE_REQUEST_UPDATE:
       'The time to update the work schedule has expired',
+  },
+
+  FLIGHT_SCHEDULE: {
+    EXCEED_NUMBER: 'Exceed the number of helicopters flying at the same time',
+    PILOT_IN_PROCESS(id: number) {
+      return `The pilot is on another flight with id ${id}`;
+    },
+    TOUR_GUIDE_IN_PROCESS(id: number) {
+      return `The tour guide is on another flight ${id}`;
+    },
+    HELICOPTER_IN_PROCESS(id: number) {
+      return `The helicopter is on another flight ${id}`;
+    },
+    CREATE_SUCCESS: 'Create flight schedule time time successfully!',
   },
 };

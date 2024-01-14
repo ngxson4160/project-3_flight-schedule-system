@@ -35,6 +35,8 @@ enum WORK_SCHEDULE_STATUS {
 }
 
 enum FLIGHT_SCHEDULE_STATUS {
+    BOOKING_SUCCESS
+    CANCEL
     PENDING_HIRE
     ACCEPT_HIRE
     REJECT_HIRE
@@ -128,6 +130,7 @@ model Route {
     flightLength Int
     duration     Int
     type         ROUTE_TYPE
+    price        Int
 
     flightSchedule         FlightSchedule[]
     adventureOparatingTime AdventureOperatingTime[]
@@ -149,10 +152,13 @@ model FlightSchedule {
     route        Route      @relation(fields: [routeId], references: [id])
     helicopter   Helicopter @relation(fields: [helicopterId], references: [id])
 
-    date     DateTime
-    start    DateTime
-    end      DateTime
-    duration Int
+    date              DateTime
+    start             DateTime
+    end               DateTime
+    duration          Int
+    isAllowMatchOther Boolean  @default(false) @map("is_allow_match_other")
+    price             Int
+    capacity          Int
 
     userFlightSchedule        UserFlightSchedule[]
     NoteRequestHireHelicopter NoteRequestHireHelicopter[]
@@ -247,7 +253,7 @@ model NoteRequestChangeWorkSchedule {
     workSchedule   WorkSchedule @relation(fields: [workScheduleId], references: [id])
 
     message String
-    role ROLE
+    role    ROLE
 
     @@map("note_request_change_work_schedule")
 }
@@ -266,7 +272,19 @@ model NoteRequestHireHelicopter {
     workSchedule     FlightSchedule @relation(fields: [flightScheduleId], references: [id])
 
     message String
-    role ROLE
+    role    ROLE
 
     @@map("note_request_hire_helicopter")
+}
+
+model Configuration {
+    id       Int       @id @default(autoincrement())
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
+
+    key   String
+    value String
 }
