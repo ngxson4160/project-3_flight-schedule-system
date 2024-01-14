@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateFlightScheduleDto } from './dto/create-flight-schedule.dto';
 import { MessageResponse } from 'src/common/constants/message-response.constant';
 import { FLIGHT_SCHEDULE_STATUS, ROLE } from '@prisma/client';
+import { FGetListFlightScheduleDto } from './dto/get-list-flight-schedule.dto';
 
 @Injectable()
 export class FlightScheduleService {
@@ -206,6 +207,43 @@ export class FlightScheduleService {
         pilotId: createFlightScheduleDto.pilotId,
         tourGuideId: createFlightScheduleDto.tourGuideId,
       },
+    };
+  }
+
+  async getListFlightSchedule(filter: FGetListFlightScheduleDto) {
+    // const listAdventureOperatingTimeFound = await this.prisma.adventureOperatingTime.findMany({
+    //   skip: (filter.page - 1) * filter.perPage,
+    //   take: filter.perPage,
+    //   orderBy: {
+    //     capacity: 'asc',
+    //   },
+    // });
+
+    let whereQuery = {};
+    if (filter.start) {
+      whereQuery = { ...whereQuery, start: { gte: new Date(filter.start) } };
+    }
+    if (filter.end) {
+      whereQuery = { ...whereQuery, end: { lte: new Date(filter.end) } };
+    }
+    if (filter.userId) {
+      whereQuery = {
+        ...whereQuery,
+        userFlightSchedule: {
+          some: {
+            userId: filter.userId,
+          },
+        },
+      };
+    }
+
+    const listWorkScheduleFound = await this.prisma.flightSchedule.findMany({
+      where: whereQuery,
+    });
+
+    return {
+      message: MessageResponse.WORK_SCHEDULE.GET_LIST_SUCCESS,
+      data: listWorkScheduleFound,
     };
   }
 }

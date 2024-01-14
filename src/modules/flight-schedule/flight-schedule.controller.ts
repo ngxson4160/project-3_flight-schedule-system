@@ -5,6 +5,7 @@ import { UserDataType } from 'src/common/types/user-data.type';
 import { CreateFlightScheduleDto } from './dto/create-flight-schedule.dto';
 import { Role } from 'src/auth/decorator/role.decorator';
 import { ROLE } from '@prisma/client';
+import { FGetListFlightScheduleDto } from './dto/get-list-flight-schedule.dto';
 
 @Controller('flight-schedules')
 export class FlightScheduleController {
@@ -19,6 +20,15 @@ export class FlightScheduleController {
     return this.flightScheduleService.createAdventureFlightSchedule(
       customerInfo.id,
       createFlightScheduleDto,
+    );
+  }
+
+  @Get()
+  async getListFlightSchedule(
+    @Body() getListFlightScheduleDto: FGetListFlightScheduleDto,
+  ) {
+    return this.flightScheduleService.getListFlightSchedule(
+      getListFlightScheduleDto,
     );
   }
 }
