@@ -8,8 +8,9 @@ import {
   UpdateWorkScheduleDto,
 } from './dto/create-work-schedule.dto';
 import { FGetListWorkScheduleDto } from './dto/get-list-work-schedule.dto';
-import { WORK_SCHEDULE_STATUS } from '@prisma/client';
+import { ROLE, WORK_SCHEDULE_STATUS } from '@prisma/client';
 import { checkValidTime } from 'src/utils/function.utils';
+import { UserDataType } from 'src/common/types/user-data.type';
 
 @Injectable()
 export class WorkScheduleService {
@@ -165,13 +166,31 @@ export class WorkScheduleService {
       where: { parentId: workScheduleId },
     });
 
-    let noteRequestChangeFound;
+    const noteRequestChangeFound: {
+      reasonUpdate?: string;
+      resolveMessage?: string;
+    } = {};
 
     if (workScheduleChildFound) {
-      noteRequestChangeFound =
+      const noteRequestChangeStaffFound =
         await this.prisma.noteRequestChangeWorkSchedule.findFirst({
-          where: { workScheduleId: workScheduleChildFound.id },
+          where: {
+            workScheduleId: workScheduleChildFound.id,
+            NOT: [{ role: ROLE.ADMIN }],
+          },
         });
+
+      const noteRequestChangeAdminFound =
+        await this.prisma.noteRequestChangeWorkSchedule.findFirst({
+          where: {
+            workScheduleId: workScheduleChildFound.id,
+            role: ROLE.ADMIN,
+          },
+        });
+      noteRequestChangeFound.reasonUpdate =
+        noteRequestChangeStaffFound?.message;
+      noteRequestChangeFound.resolveMessage =
+        noteRequestChangeAdminFound?.message;
     }
 
     return {
@@ -180,19 +199,22 @@ export class WorkScheduleService {
         workSchedule: workScheduleFound,
         workScheduleUpdate: {
           ...workScheduleChildFound,
-          reasonUpdate: noteRequestChangeFound?.message,
+          message: {
+            reasonUpdate: noteRequestChangeFound.reasonUpdate,
+            resolveMessage: noteRequestChangeFound.resolveMessage,
+          },
         },
       },
     };
   }
 
   async requestUpdateWorkSchedule(
-    userId: number,
+    userInfo: UserDataType,
     workScheduleId: number,
     updateWorkSchedule: RequestUpdateWorkScheduleDto,
   ) {
     const userFound = await this.prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: userInfo.id },
     });
 
     if (!userFound) {
@@ -201,7 +223,7 @@ export class WorkScheduleService {
     const workScheduleFound = await this.prisma.workSchedule.findFirst({
       where: {
         id: workScheduleId,
-        userId,
+        userId: userInfo.id,
         OR: [
           { status: WORK_SCHEDULE_STATUS.APPLY },
           { status: WORK_SCHEDULE_STATUS.ORIGINAL },
@@ -213,7 +235,7 @@ export class WorkScheduleService {
       throw new BadRequestException(
         MessageResponse.WORK_SCHEDULE.NOT_EXIST_WITH_USER(
           workScheduleId,
-          userId,
+          userInfo.id,
         ),
       );
     }
@@ -236,7 +258,10 @@ export class WorkScheduleService {
       if (updateWorkSchedule.reason) {
         const noteRequestChangeFound =
           await this.prisma.noteRequestChangeWorkSchedule.findFirst({
-            where: { workScheduleId: workScheduleChildFound.id, userId },
+            where: {
+              workScheduleId: workScheduleChildFound.id,
+              userId: userInfo.id,
+            },
           });
         if (noteRequestChangeFound) {
           await this.prisma.noteRequestChangeWorkSchedule.update({
@@ -246,9 +271,10 @@ export class WorkScheduleService {
         } else {
           await this.prisma.noteRequestChangeWorkSchedule.create({
             data: {
-              userId,
+              userId: userInfo.id,
               workScheduleId: workScheduleChildFound.id,
               message: updateWorkSchedule.reason,
+              role: userInfo.role,
             },
           });
         }
@@ -281,9 +307,10 @@ export class WorkScheduleService {
       if (reason) {
         await this.prisma.noteRequestChangeWorkSchedule.create({
           data: {
-            userId,
+            userId: userInfo.id,
             workScheduleId: workScheduleChildUpdate.id,
             message: reason,
+            role: userInfo.role,
           },
         });
       }
@@ -297,7 +324,7 @@ export class WorkScheduleService {
 
   async resolveUpdateWorkSchedule(
     id: number,
-    userId: number,
+    userInfo: UserDataType,
     resolveUpdateWorkSchedule: ResolveUpdateWorkScheduleDto,
   ) {
     const workScheduleFound = await this.prisma.workSchedule.findFirst({
@@ -325,7 +352,10 @@ export class WorkScheduleService {
     if (resolveUpdateWorkSchedule?.reason) {
       const noteRequestChangeFound =
         await this.prisma.noteRequestChangeWorkSchedule.findFirst({
-          where: { workScheduleId: workScheduleChildFound.id, userId },
+          where: {
+            workScheduleId: workScheduleChildFound.id,
+            userId: userInfo.id,
+          },
         });
       if (noteRequestChangeFound) {
         await this.prisma.noteRequestChangeWorkSchedule.update({
@@ -335,9 +365,10 @@ export class WorkScheduleService {
       } else {
         await this.prisma.noteRequestChangeWorkSchedule.create({
           data: {
-            userId,
+            userId: userInfo.id,
             workScheduleId: workScheduleChildFound.id,
             message: resolveUpdateWorkSchedule.reason,
+            role: userInfo.role,
           },
         });
       }

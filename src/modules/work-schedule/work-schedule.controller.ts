@@ -70,7 +70,7 @@ export class WorkScheduleController {
     @Body() updateWorkSchedule: RequestUpdateWorkScheduleDto,
   ) {
     return this.workScheduleService.requestUpdateWorkSchedule(
-      userInfo.id,
+      userInfo,
       +workScheduleId,
       updateWorkSchedule,
     );
@@ -85,7 +85,7 @@ export class WorkScheduleController {
   ) {
     return this.workScheduleService.resolveUpdateWorkSchedule(
       +id,
-      userInfo.id,
+      userInfo,
       resolveUpdateWorkSchedule,
     );
   }

@@ -247,6 +247,7 @@ model NoteRequestChangeWorkSchedule {
     workSchedule   WorkSchedule @relation(fields: [workScheduleId], references: [id])
 
     message String
+    role ROLE
 
     @@map("note_request_change_work_schedule")
 }
@@ -265,6 +266,7 @@ model NoteRequestHireHelicopter {
     workSchedule     FlightSchedule @relation(fields: [flightScheduleId], references: [id])
 
     message String
+    role ROLE
 
     @@map("note_request_hire_helicopter")
 }
