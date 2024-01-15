@@ -78,7 +78,10 @@ export class AdventureOperatingTimeService {
 
     const adventureOperatingTimeFound =
       await this.prisma.adventureOperatingTime.findFirst({
-        where: { date: dateWithoutTime },
+        where: {
+          date: dateWithoutTime,
+          routeId: adventureOperatingTime.routeId,
+        },
       });
     if (adventureOperatingTimeFound) {
       throw new BadRequestException(
