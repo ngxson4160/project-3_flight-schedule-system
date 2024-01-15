@@ -32,6 +32,7 @@ export const MessageResponse = {
     GET_DETAIL_SUCCESS: 'Get detail helicopter successfully',
     GET_LIST_SUCCESS: 'Get list helicopter successfully',
     DELETE_SUCCESS: 'Delete helicopter successfully',
+    EXCEED_CAPACITY: "Exceeds the helicopter's capacity",
   },
 
   ROUTE: {

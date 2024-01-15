@@ -18,7 +18,7 @@ export class CreateFlightScheduleDto {
   isAllowMatchOther?: boolean;
 
   @IsNumber()
-  capacity = 1;
+  capacity: number;
 
   @IsDateString()
   start: Date;

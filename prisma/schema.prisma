@@ -25,6 +25,7 @@ enum ROUTE_TYPE {
     TRAINING
     REGULAR
     TEST
+    HIRE
 }
 
 enum WORK_SCHEDULE_STATUS {
@@ -279,7 +280,7 @@ model NoteRequestHireHelicopter {
 
     userId           Int            @map("user_id")
     user             User           @relation(fields: [userId], references: [id])
-    flightScheduleId Int            @unique() @map("flight_schedule_id")
+    flightScheduleId Int            @map("flight_schedule_id")
     workSchedule     FlightSchedule @relation(fields: [flightScheduleId], references: [id])
 
     message String

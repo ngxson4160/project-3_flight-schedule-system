@@ -8,6 +8,7 @@ import { ROLE } from '@prisma/client';
 import { FGetListFlightScheduleDto } from './dto/get-list-flight-schedule.dto';
 import { userInfo } from 'os';
 import { FGetAvailableResourceDto } from './dto/get-available-resource.dto';
+import { RequestHireHelicopterDto } from './dto/request-hire-helicopter.dto';
 
 @Controller('flight-schedules')
 export class FlightScheduleController {
@@ -46,5 +47,17 @@ export class FlightScheduleController {
   @Get('get-list-resources-available')
   async getListResourcesAvailable(@Body() filter: FGetAvailableResourceDto) {
     return this.flightScheduleService.getListResourcesAvailable(filter);
+  }
+
+  @Role(ROLE.CUSTOMER)
+  @Post('request-hire-helicopter')
+  async requestHireHelicopter(
+    @UserData() customerInfo: UserDataType,
+    @Body() requestHireDto: RequestHireHelicopterDto,
+  ) {
+    return this.flightScheduleService.requestHireHelicopter(
+      customerInfo.id,
+      requestHireDto,
+    );
   }
 }

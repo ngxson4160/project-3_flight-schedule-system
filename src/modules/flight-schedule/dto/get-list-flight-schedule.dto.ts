@@ -1,4 +1,5 @@
-import { IsISO8601, IsOptional } from 'class-validator';
+import { FLIGHT_SCHEDULE_STATUS, ROUTE_TYPE } from '@prisma/client';
+import { IsEnum, IsISO8601, IsOptional } from 'class-validator';
 
 export class FGetListFlightScheduleDto {
   @IsOptional()
@@ -11,4 +12,12 @@ export class FGetListFlightScheduleDto {
   @IsISO8601()
   @IsOptional()
   end: Date;
+
+  @IsEnum(FLIGHT_SCHEDULE_STATUS)
+  @IsOptional()
+  status: FLIGHT_SCHEDULE_STATUS;
+
+  @IsEnum(ROUTE_TYPE)
+  @IsOptional()
+  type: ROUTE_TYPE;
 }
