@@ -10,6 +10,7 @@ import {
 } from '@prisma/client';
 import { FGetListFlightScheduleDto } from './dto/get-list-flight-schedule.dto';
 import { getDateWithoutTime } from 'src/utils/function.utils';
+import { UserDataType } from 'src/common/types/user-data.type';
 
 @Injectable()
 export class FlightScheduleService {
@@ -143,6 +144,7 @@ export class FlightScheduleService {
         end: {
           gte: timeStartDelay,
         },
+        status: FLIGHT_SCHEDULE_STATUS.BOOKING_SUCCESS,
       },
     });
     if (sameRouteFlightSchedule.length > 0) {
@@ -164,6 +166,7 @@ export class FlightScheduleService {
             userId: createFlightScheduleDto.pilotId,
           },
         },
+        status: FLIGHT_SCHEDULE_STATUS.BOOKING_SUCCESS,
       },
       include: {
         userFlightSchedule: {
@@ -195,6 +198,7 @@ export class FlightScheduleService {
             userId: createFlightScheduleDto.tourGuideId,
           },
         },
+        status: FLIGHT_SCHEDULE_STATUS.BOOKING_SUCCESS,
       },
       include: {
         userFlightSchedule: {
@@ -223,6 +227,7 @@ export class FlightScheduleService {
           end: {
             gte: timeStartDelay,
           },
+          status: FLIGHT_SCHEDULE_STATUS.BOOKING_SUCCESS,
         },
       },
     );
@@ -273,6 +278,7 @@ export class FlightScheduleService {
       data: {
         userId: createFlightScheduleDto.pilotId,
         flightScheduleId: createFlightSchedule.id,
+        price: routeFound.price,
       },
     });
     await this.prisma.userFlightSchedule.create({
@@ -321,12 +327,56 @@ export class FlightScheduleService {
     }
 
     const listWorkScheduleFound = await this.prisma.flightSchedule.findMany({
-      where: whereQuery,
+      where: { ...whereQuery, status: FLIGHT_SCHEDULE_STATUS.BOOKING_SUCCESS },
     });
 
     return {
       message: MessageResponse.WORK_SCHEDULE.GET_LIST_SUCCESS,
       data: listWorkScheduleFound,
+    };
+  }
+
+  async cancelFlightSchedule(id: number, userInfo: UserDataType) {
+    const flightScheduleFound = await this.prisma.flightSchedule.findUnique({
+      where: { id },
+    });
+    if (!flightScheduleFound) {
+      throw new BadRequestException(MessageResponse.FLIGHT_SCHEDULE.NOT_EXIST);
+    }
+
+    const userBookingFound = await this.prisma.userFlightSchedule.findFirst({
+      where: {
+        userId: userInfo.id,
+        flightScheduleId: id,
+      },
+    });
+    if (!userBookingFound && userInfo.role === ROLE.CUSTOMER) {
+      throw new BadRequestException(
+        MessageResponse.FLIGHT_SCHEDULE.FLIGHT_NOT_BELONG_TO_USER,
+      );
+    }
+
+    const validDateCancel = new Date(flightScheduleFound.start);
+    validDateCancel.setHours(validDateCancel.getHours() - 1);
+    console.log(new Date());
+
+    if (userInfo.role === ROLE.CUSTOMER && new Date() > validDateCancel) {
+      throw new BadRequestException(
+        MessageResponse.FLIGHT_SCHEDULE.INVALID_TIME_CANCEL,
+      );
+    }
+
+    await this.prisma.flightSchedule.update({
+      where: {
+        id,
+      },
+      data: {
+        status: FLIGHT_SCHEDULE_STATUS.CANCEL,
+      },
+    });
+
+    return {
+      message: MessageResponse.FLIGHT_SCHEDULE.CANCEL_SUCCESS,
     };
   }
 }
