@@ -7,6 +7,7 @@ import { Role } from 'src/auth/decorator/role.decorator';
 import { ROLE } from '@prisma/client';
 import { FGetListFlightScheduleDto } from './dto/get-list-flight-schedule.dto';
 import { userInfo } from 'os';
+import { FGetAvailableResourceDto } from './dto/get-available-resource.dto';
 
 @Controller('flight-schedules')
 export class FlightScheduleController {
@@ -40,5 +41,10 @@ export class FlightScheduleController {
     @UserData() userInfo: UserDataType,
   ) {
     return this.flightScheduleService.cancelFlightSchedule(+id, userInfo);
+  }
+
+  @Get('get-list-resources-available')
+  async getListResourcesAvailable(@Body() filter: FGetAvailableResourceDto) {
+    return this.flightScheduleService.getListResourcesAvailable(filter);
   }
 }

@@ -11,6 +11,7 @@ import {
 import { FGetListFlightScheduleDto } from './dto/get-list-flight-schedule.dto';
 import { getDateWithoutTime } from 'src/utils/function.utils';
 import { UserDataType } from 'src/common/types/user-data.type';
+import { FGetAvailableResourceDto } from './dto/get-available-resource.dto';
 
 @Injectable()
 export class FlightScheduleService {
@@ -377,6 +378,115 @@ export class FlightScheduleService {
 
     return {
       message: MessageResponse.FLIGHT_SCHEDULE.CANCEL_SUCCESS,
+    };
+  }
+
+  async getListResourcesAvailable(filter: FGetAvailableResourceDto) {
+    const pilotUsers = await this.prisma.user.findMany({
+      where: {
+        role: ROLE.PILOT,
+        userFlightSchedule: {
+          none: {
+            flightSchedule: {
+              AND: [
+                { start: { lte: filter.end } },
+                { end: { gte: filter.start } },
+              ],
+            },
+          },
+        },
+        workSchedule: {
+          some: {
+            AND: [
+              { startTime: { lte: filter.start } },
+              { endTime: { gte: filter.end } },
+              { status: WORK_SCHEDULE_STATUS.APPLY },
+            ],
+          },
+        },
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        workSchedule: {
+          select: {
+            startTime: true,
+            endTime: true,
+          },
+        },
+      },
+    });
+
+    // const test1 = new Date("2024-01-15T00:00:00.000Z")
+    // const test2 = new Date("2024-01-15T03:00:00.000Z")
+    // console.log(test1 < test2)
+
+    const tourGuideUsers = await this.prisma.user.findMany({
+      where: {
+        role: ROLE.TOUR_GUIDE,
+        userFlightSchedule: {
+          none: {
+            flightSchedule: {
+              AND: [
+                { start: { lte: filter.end } },
+                { end: { gte: filter.start } },
+              ],
+            },
+          },
+        },
+        workSchedule: {
+          some: {
+            AND: [
+              { startTime: { lte: filter.start } },
+              { endTime: { gte: filter.end } },
+              { status: WORK_SCHEDULE_STATUS.APPLY },
+            ],
+          },
+        },
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        workSchedule: {
+          select: {
+            startTime: true,
+            endTime: true,
+          },
+        },
+      },
+    });
+
+    const helicopters = await this.prisma.helicopter.findMany({
+      where: {
+        flightSchedule: {
+          none: {
+            AND: [
+              { start: { lte: filter.end } },
+              { end: { gte: filter.start } },
+            ],
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        capacity: true,
+        img: true,
+        type: true,
+        engine: true,
+        speed: true,
+      },
+    });
+
+    return {
+      message: MessageResponse.COMMON.GET_LIST_AVAILABLE_RESOURCE_SUCCESS,
+      data: {
+        pilots: pilotUsers,
+        tourGuides: tourGuideUsers,
+        helicopters: helicopters,
+      },
     };
   }
 }

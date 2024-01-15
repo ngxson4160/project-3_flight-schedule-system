@@ -4,6 +4,8 @@ export const MessageResponse = {
       'Please fill in the information field you want to change',
     INVALID_HOUR_MINUS_FORMAT: 'Invalid time format. Use HH:mm.',
     INVALID_TIME_START_AND_END: 'Invalid time start and end',
+    GET_LIST_AVAILABLE_RESOURCE_SUCCESS:
+      'Get list available resource successfully',
   },
 
   USER: {
