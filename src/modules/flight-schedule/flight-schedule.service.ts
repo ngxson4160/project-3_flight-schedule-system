@@ -2,8 +2,14 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateFlightScheduleDto } from './dto/create-flight-schedule.dto';
 import { MessageResponse } from 'src/common/constants/message-response.constant';
-import { FLIGHT_SCHEDULE_STATUS, ROLE } from '@prisma/client';
+import {
+  FLIGHT_SCHEDULE_STATUS,
+  ROLE,
+  ROUTE_TYPE,
+  WORK_SCHEDULE_STATUS,
+} from '@prisma/client';
 import { FGetListFlightScheduleDto } from './dto/get-list-flight-schedule.dto';
+import { getDateWithoutTime } from 'src/utils/function.utils';
 
 @Injectable()
 export class FlightScheduleService {
@@ -13,6 +19,8 @@ export class FlightScheduleService {
     customerId: number,
     createFlightScheduleDto: CreateFlightScheduleDto,
   ) {
+    const dateBooking = getDateWithoutTime(createFlightScheduleDto.start);
+
     const customerFound = await this.prisma.user.findUnique({
       where: { id: customerId, role: ROLE.CUSTOMER },
     });
@@ -48,8 +56,68 @@ export class FlightScheduleService {
       throw new BadRequestException(MessageResponse.HELICOPTER.NOT_EXIST);
     }
 
+    const endTime = new Date(createFlightScheduleDto.start);
+    endTime.setMinutes(endTime.getMinutes() + routeFound.duration / 60);
+
+    const adventureOperatingTimeFound =
+      await this.prisma.adventureOperatingTime.findFirst({
+        where: { date: dateBooking },
+      });
+
+    if (!adventureOperatingTimeFound) {
+      throw new BadRequestException(
+        MessageResponse.ADVENTURE_OPERATING_TIME.NOT_EXIST,
+      );
+    }
+
+    if (
+      (createFlightScheduleDto.start <
+        adventureOperatingTimeFound.startMorning ||
+        endTime > adventureOperatingTimeFound.endMorning) &&
+      (createFlightScheduleDto.start <
+        adventureOperatingTimeFound.startAfternoon ||
+        endTime > adventureOperatingTimeFound.endAfternoon)
+    ) {
+      throw new BadRequestException(
+        MessageResponse.ADVENTURE_OPERATING_TIME.OUTSIDE_OF_OPERATING_HOURS,
+      );
+    }
+
+    const pilotWorkScheduleFound = await this.prisma.workSchedule.findFirst({
+      where: {
+        userId: createFlightScheduleDto.pilotId,
+        date: dateBooking,
+        startTime: { lte: createFlightScheduleDto.start },
+        endTime: { gte: endTime },
+        status: WORK_SCHEDULE_STATUS.APPLY,
+      },
+    });
+    if (!pilotWorkScheduleFound) {
+      throw new BadRequestException(
+        MessageResponse.WORK_SCHEDULE.PILOT_OUTSIDE_OF_OPERATING_HOURS,
+      );
+    }
+
+    const tourGuideWorkScheduleFound = await this.prisma.workSchedule.findFirst(
+      {
+        where: {
+          userId: createFlightScheduleDto.tourGuideId,
+          date: dateBooking,
+          startTime: { lte: createFlightScheduleDto.start },
+          endTime: { gte: endTime },
+          status: WORK_SCHEDULE_STATUS.APPLY,
+        },
+      },
+    );
+    if (!tourGuideWorkScheduleFound) {
+      throw new BadRequestException(
+        MessageResponse.WORK_SCHEDULE.TOUR_GUIDE_OUTSIDE_OF_OPERATING_HOURS,
+      );
+    }
+
     const timeStartDelay = new Date(createFlightScheduleDto.start);
     timeStartDelay.setMinutes(timeStartDelay.getMinutes() - 15);
+
     const flightSchedule = await this.prisma.flightSchedule.findMany({
       where: {
         start: {
@@ -60,10 +128,26 @@ export class FlightScheduleService {
         },
       },
     });
-
     if (flightSchedule.length >= 2) {
       throw new BadRequestException(
         MessageResponse.FLIGHT_SCHEDULE.EXCEED_NUMBER,
+      );
+    }
+
+    const sameRouteFlightSchedule = await this.prisma.flightSchedule.findMany({
+      where: {
+        routeId: createFlightScheduleDto.routeId,
+        start: {
+          lte: createFlightScheduleDto.start,
+        },
+        end: {
+          gt: timeStartDelay,
+        },
+      },
+    });
+    if (sameRouteFlightSchedule.length > 0) {
+      throw new BadRequestException(
+        MessageResponse.FLIGHT_SCHEDULE.EXCEED_NUMBER_SAME_ROUTE,
       );
     }
 
@@ -151,8 +235,6 @@ export class FlightScheduleService {
       );
     }
 
-    const endTime = new Date(createFlightScheduleDto.start);
-    endTime.setMinutes(endTime.getMinutes() + routeFound.duration / 60);
     // const dataCreateFlightSchedule = {
     //   routeId: createFlightScheduleDto.routeId,
     //   helicopterId: createFlightScheduleDto.helicopterId,
@@ -172,6 +254,7 @@ export class FlightScheduleService {
       status: FLIGHT_SCHEDULE_STATUS.BOOKING_SUCCESS,
       duration: routeFound.duration,
       price: routeFound.price ?? 0,
+      type: ROUTE_TYPE.ADVENTURE,
     };
     delete dataCreateFlightSchedule.pilotId;
     delete dataCreateFlightSchedule.tourGuideId;
@@ -221,10 +304,10 @@ export class FlightScheduleService {
 
     let whereQuery = {};
     if (filter.start) {
-      whereQuery = { ...whereQuery, start: { gte: new Date(filter.start) } };
+      whereQuery = { ...whereQuery, start: { gte: filter.start } };
     }
     if (filter.end) {
-      whereQuery = { ...whereQuery, end: { lte: new Date(filter.end) } };
+      whereQuery = { ...whereQuery, end: { lte: filter.end } };
     }
     if (filter.userId) {
       whereQuery = {

@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
   Matches,
+  IsDateString,
 } from 'class-validator';
 import { MessageResponse } from 'src/common/constants/message-response.constant';
 import { RegexConstant } from 'src/common/constants/regex.constant';
@@ -17,49 +18,54 @@ export class CreateWorkScheduleDto {
   @IsOptional()
   parentId?: number;
 
-  @IsString()
-  @Matches(RegexConstant.TimeReg_HH_MM, {
-    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
-  })
-  startTime: string;
+  // @IsString()
+  // @Matches(RegexConstant.TimeReg_HH_MM, {
+  //   message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  // })
+  // startTime: string;
 
-  @IsString()
-  @Matches(RegexConstant.TimeReg_HH_MM, {
-    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
-  })
-  endTime: string;
+  // @IsString()
+  // @Matches(RegexConstant.TimeReg_HH_MM, {
+  //   message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  // })
+  // endTime: string;
+
+  @IsDateString()
+  startTime: Date;
+
+  @IsDateString()
+  endTime: Date;
 
   // @Transform( ({ value }) => value && new Date(value))
-  @IsISO8601()
+  @IsDateString()
   date: Date;
 }
 
 export class UpdateWorkScheduleDto {
-  @IsNumber()
-  @IsOptional()
-  userId?: number;
+  // @IsString()
+  // @Matches(RegexConstant.TimeReg_HH_MM, {
+  //   message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  // })
+  // @IsOptional()
+  // startTime?: string;
 
-  @IsNumber()
-  @IsOptional()
-  parentId?: number;
+  // @IsString()
+  // @Matches(RegexConstant.TimeReg_HH_MM, {
+  //   message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  // })
+  // @IsOptional()
+  // endTime?: string;
 
-  @IsString()
-  @Matches(RegexConstant.TimeReg_HH_MM, {
-    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
-  })
+  @IsDateString()
   @IsOptional()
   startTime?: string;
 
-  @IsString()
-  @Matches(RegexConstant.TimeReg_HH_MM, {
-    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
-  })
+  @IsDateString()
   @IsOptional()
   endTime?: string;
 
   // @Transform( ({ value }) => value && new Date(value))
-  @IsISO8601()
-  @IsOptional()
+  @IsDateString()
   date: Date;
 }
 

@@ -1,6 +1,7 @@
 import { Transform, Type } from 'class-transformer';
 import {
   IsDate,
+  IsDateString,
   IsISO8601,
   IsNumber,
   IsOptional,
@@ -15,73 +16,100 @@ export class CreateAdventureOperatingTimeDto {
   @IsNumber()
   routeId: number;
 
-  @IsString()
-  @Matches(RegexConstant.TimeReg_HH_MM, {
-    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
-  })
-  @IsOptional()
-  startMorning?: string;
+  // @IsString()
+  // @Matches(RegexConstant.TimeReg_HH_MM, {
+  //   message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  // })
+  // @IsOptional()
+  // startMorning?: string;
 
-  @IsString()
-  @Matches(RegexConstant.TimeReg_HH_MM, {
-    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
-  })
-  @IsOptional()
-  endMorning?: string;
+  // @IsString()
+  // @Matches(RegexConstant.TimeReg_HH_MM, {
+  //   message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  // })
+  // @IsOptional()
+  // endMorning?: string;
 
-  @IsString()
-  @Matches(RegexConstant.TimeReg_HH_MM, {
-    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
-  })
-  @IsOptional()
-  startAfternoon?: string;
+  // @IsString()
+  // @Matches(RegexConstant.TimeReg_HH_MM, {
+  //   message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  // })
+  // @IsOptional()
+  // startAfternoon?: string;
 
-  @IsString()
-  @Matches(RegexConstant.TimeReg_HH_MM, {
-    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
-  })
-  @IsOptional()
-  endAfternoon?: string;
+  // @IsString()
+  // @Matches(RegexConstant.TimeReg_HH_MM, {
+  //   message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  // })
+  // @IsOptional()
+  // endAfternoon?: string;
 
-  // @Transform( ({ value }) => value && new Date(value))
-  @IsISO8601()
+  @IsDateString()
+  @IsOptional()
+  startMorning?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  endMorning?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  startAfternoon?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  endAfternoon?: Date;
+
+  @IsDateString()
   date: Date;
 }
 
 export class UpdateAdventureOperatingTimeDto {
   @IsNumber()
+  @IsOptional()
   routeId: number;
 
-  @IsString()
-  @Matches(RegexConstant.TimeReg_HH_MM, {
-    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
-  })
+  @IsDateString()
   @IsOptional()
-  startMorning?: string;
+  startMorning?: Date;
 
-  @IsString()
-  @Matches(RegexConstant.TimeReg_HH_MM, {
-    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
-  })
+  @IsDateString()
   @IsOptional()
-  endMorning?: string;
+  endMorning?: Date;
 
-  @IsString()
-  @Matches(RegexConstant.TimeReg_HH_MM, {
-    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
-  })
+  @IsDateString()
   @IsOptional()
-  startAfternoon?: string;
+  startAfternoon?: Date;
 
-  @IsString()
-  @Matches(RegexConstant.TimeReg_HH_MM, {
-    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
-  })
+  @IsDateString()
   @IsOptional()
-  endAfternoon?: string;
+  endAfternoon?: Date;
 
-  // @Transform( ({ value }) => value && new Date(value))
-  @IsISO8601()
-  @IsOptional()
-  date?: Date;
+  // @IsString()
+  // @Matches(RegexConstant.TimeReg_HH_MM, {
+  //   message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  // })
+  // @IsOptional()
+  // startMorning?: string;
+
+  // @IsString()
+  // @Matches(RegexConstant.TimeReg_HH_MM, {
+  //   message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  // })
+  // @IsOptional()
+  // endMorning?: string;
+
+  // @IsString()
+  // @Matches(RegexConstant.TimeReg_HH_MM, {
+  //   message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  // })
+  // @IsOptional()
+  // startAfternoon?: string;
+
+  // @IsString()
+  // @Matches(RegexConstant.TimeReg_HH_MM, {
+  //   message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  // })
+  // @IsOptional()
+  // endAfternoon?: string;
 }

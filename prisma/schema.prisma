@@ -156,9 +156,10 @@ model FlightSchedule {
     start             DateTime
     end               DateTime
     duration          Int
-    isAllowMatchOther Boolean  @default(false) @map("is_allow_match_other")
+    isAllowMatchOther Boolean    @default(false) @map("is_allow_match_other")
     price             Int
     capacity          Int
+    type              ROUTE_TYPE
 
     userFlightSchedule        UserFlightSchedule[]
     NoteRequestHireHelicopter NoteRequestHireHelicopter[]
@@ -187,8 +188,8 @@ model WorkSchedule {
     userId Int  @map("user_id")
     user   User @relation(fields: [userId], references: [id])
 
-    startTime                     String
-    endTime                       String
+    startTime                     DateTime
+    endTime                       DateTime
     date                          DateTime                        @db.Timestamp(0)
     parentId                      Int?                            @map("parent_id")
     status                        WORK_SCHEDULE_STATUS?           @default(APPLY)
@@ -230,11 +231,11 @@ model AdventureOperatingTime {
     routeId Int   @map("route_id")
     route   Route @relation(fields: [routeId], references: [id])
 
-    startMorning   String?
-    endMorning     String?
-    startAfternoon String?
-    endAfternoon   String?
-    date           DateTime @db.Timestamp(0)
+    startMorning   DateTime?
+    endMorning     DateTime?
+    startAfternoon DateTime?
+    endAfternoon   DateTime?
+    date           DateTime  @db.Timestamp(0)
 
     @@map("adventure_operating_time")
 }
@@ -287,4 +288,6 @@ model Configuration {
 
     key   String
     value String
+
+    @@map("configuration")
 }

@@ -6,7 +6,7 @@ import {
   UpdateAdventureOperatingTimeDto,
 } from './dto/create-adventure-operating-time.dto';
 import { FGetListAdventureOperatingTimeDto } from './dto/get-list-adventure-operating-time.dto';
-import { checkValidTime } from 'src/utils/function.utils';
+import { checkSameDay, getDateWithoutTime } from 'src/utils/function.utils';
 
 @Injectable()
 export class AdventureOperatingTimeService {
@@ -15,6 +15,8 @@ export class AdventureOperatingTimeService {
   async createAdventureOperatingTime(
     adventureOperatingTime: CreateAdventureOperatingTimeDto,
   ) {
+    const dateWithoutTime = getDateWithoutTime(adventureOperatingTime.date);
+
     if (
       (adventureOperatingTime!.startMorning &&
         !adventureOperatingTime!.endMorning) ||
@@ -35,18 +37,34 @@ export class AdventureOperatingTimeService {
         MessageResponse.ADVENTURE_OPERATING_TIME.ERROR_DATE,
       );
     }
-
-    if (adventureOperatingTime!.startMorning) {
-      checkValidTime(
+    if (
+      adventureOperatingTime!.startMorning &&
+      (!checkSameDay(
         adventureOperatingTime!.startMorning,
         adventureOperatingTime!.endMorning,
+      ) ||
+        !checkSameDay(
+          adventureOperatingTime!.startMorning,
+          adventureOperatingTime.date,
+        ))
+    ) {
+      throw new BadRequestException(
+        MessageResponse.COMMON.INVALID_TIME_START_AND_END,
       );
     }
-
-    if (adventureOperatingTime!.startAfternoon) {
-      checkValidTime(
+    if (
+      adventureOperatingTime!.startAfternoon &&
+      (!checkSameDay(
         adventureOperatingTime!.startAfternoon,
         adventureOperatingTime!.endAfternoon,
+      ) ||
+        !checkSameDay(
+          adventureOperatingTime!.startAfternoon,
+          adventureOperatingTime.date,
+        ))
+    ) {
+      throw new BadRequestException(
+        MessageResponse.COMMON.INVALID_TIME_START_AND_END,
       );
     }
 
@@ -58,11 +76,21 @@ export class AdventureOperatingTimeService {
       throw new BadRequestException(MessageResponse.ROUTE.NOT_EXIST);
     }
 
+    const adventureOperatingTimeFound =
+      await this.prisma.adventureOperatingTime.findFirst({
+        where: { date: dateWithoutTime },
+      });
+    if (adventureOperatingTimeFound) {
+      throw new BadRequestException(
+        MessageResponse.ADVENTURE_OPERATING_TIME.EXIST,
+      );
+    }
+
     const newAdventureOperatingTime =
       await this.prisma.adventureOperatingTime.create({
         data: {
           ...adventureOperatingTime,
-          date: new Date(adventureOperatingTime.date),
+          date: dateWithoutTime,
         },
       });
     return {
@@ -75,41 +103,6 @@ export class AdventureOperatingTimeService {
     id: number,
     adventureOperatingTime: UpdateAdventureOperatingTimeDto,
   ) {
-    if (
-      (adventureOperatingTime!.startMorning &&
-        !adventureOperatingTime!.endMorning) ||
-      (!adventureOperatingTime!.startMorning &&
-        adventureOperatingTime!.endMorning)
-    ) {
-      throw new BadRequestException(
-        MessageResponse.ADVENTURE_OPERATING_TIME.ERROR_DATE,
-      );
-    }
-    if (
-      (adventureOperatingTime!.startAfternoon &&
-        !adventureOperatingTime!.endAfternoon) ||
-      (!adventureOperatingTime!.startAfternoon &&
-        adventureOperatingTime!.endAfternoon)
-    ) {
-      throw new BadRequestException(
-        MessageResponse.ADVENTURE_OPERATING_TIME.ERROR_DATE,
-      );
-    }
-
-    if (adventureOperatingTime!.startMorning) {
-      checkValidTime(
-        adventureOperatingTime!.startMorning,
-        adventureOperatingTime!.endMorning,
-      );
-    }
-
-    if (adventureOperatingTime!.startAfternoon) {
-      checkValidTime(
-        adventureOperatingTime!.startAfternoon,
-        adventureOperatingTime!.endAfternoon,
-      );
-    }
-
     const adventureOperatingTimeFound =
       await this.prisma.adventureOperatingTime.findUnique({
         where: { id },
@@ -121,14 +114,50 @@ export class AdventureOperatingTimeService {
       );
     }
 
-    let dataUpdate = {};
-    if (adventureOperatingTime?.date) {
-      dataUpdate = {
-        ...adventureOperatingTime,
-        date: new Date(adventureOperatingTime?.date),
-      };
-    } else {
-      dataUpdate = adventureOperatingTime;
+    if (
+      (adventureOperatingTime!.startMorning &&
+        !adventureOperatingTime!.endMorning) ||
+      (!adventureOperatingTime!.startMorning &&
+        adventureOperatingTime!.endMorning) ||
+      (adventureOperatingTime!.startAfternoon &&
+        !adventureOperatingTime!.endAfternoon) ||
+      (!adventureOperatingTime!.startAfternoon &&
+        adventureOperatingTime!.endAfternoon)
+    ) {
+      throw new BadRequestException(
+        MessageResponse.ADVENTURE_OPERATING_TIME.ERROR_DATE,
+      );
+    }
+
+    if (
+      adventureOperatingTime!.startMorning &&
+      (!checkSameDay(
+        adventureOperatingTime!.startMorning,
+        adventureOperatingTime!.endMorning,
+      ) ||
+        !checkSameDay(
+          adventureOperatingTime!.startMorning,
+          adventureOperatingTimeFound.date,
+        ))
+    ) {
+      throw new BadRequestException(
+        MessageResponse.COMMON.INVALID_TIME_START_AND_END,
+      );
+    }
+    if (
+      adventureOperatingTime!.startAfternoon &&
+      (!checkSameDay(
+        adventureOperatingTime!.startAfternoon,
+        adventureOperatingTime!.endAfternoon,
+      ) ||
+        !checkSameDay(
+          adventureOperatingTime!.startAfternoon,
+          adventureOperatingTimeFound.date,
+        ))
+    ) {
+      throw new BadRequestException(
+        MessageResponse.COMMON.INVALID_TIME_START_AND_END,
+      );
     }
 
     const adventureOperatingTimeUpdate =
@@ -136,7 +165,7 @@ export class AdventureOperatingTimeService {
         where: {
           id,
         },
-        data: dataUpdate,
+        data: adventureOperatingTime,
       });
     return {
       message: MessageResponse.ADVENTURE_OPERATING_TIME.UPDATE_SUCCESS,

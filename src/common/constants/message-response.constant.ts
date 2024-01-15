@@ -42,15 +42,18 @@ export const MessageResponse = {
   },
 
   ADVENTURE_OPERATING_TIME: {
+    EXIST: 'Adventure operating time exist!',
     CREATE_SUCCESS: 'Create adventure operating time time successfully!',
     ERROR_DATE: 'Must fill in start and end times',
-    NOT_EXIST: 'Adventure operating time time not exist!',
+    NOT_EXIST: 'Adventure operating time not exist!',
     UPDATE_SUCCESS: 'Update adventure operating time successfully',
     GET_LIST_SUCCESS: 'Get list adventure operating time successfully',
     DELETE_SUCCESS: 'Delete adventure operating time successfully',
+    OUTSIDE_OF_OPERATING_HOURS: 'Outside the operating time range',
   },
 
   WORK_SCHEDULE: {
+    EXIST: 'Work schedule exist!',
     CREATE_SUCCESS: 'Create work schedule time time successfully!',
     ERROR_DATE: 'Must fill in start and end times',
     NOT_EXIST: 'Work schedule time not exist!',
@@ -67,10 +70,16 @@ export const MessageResponse = {
     Resolve_UPDATE_SUCCESS: 'Resolve update work schedule time successfully',
     EXPIRED_DATE_REQUEST_UPDATE:
       'The time to update the work schedule has expired',
+    PILOT_OUTSIDE_OF_OPERATING_HOURS:
+      'Outside the operating time range of pilot',
+    TOUR_GUIDE_OUTSIDE_OF_OPERATING_HOURS:
+      'Outside the operating time range of tour guide',
   },
 
   FLIGHT_SCHEDULE: {
     EXCEED_NUMBER: 'Exceed the number of helicopters flying at the same time',
+    EXCEED_NUMBER_SAME_ROUTE:
+      'Exceeding the number of helicopters flying on the same route at the same time',
     PILOT_IN_PROCESS(id: number) {
       return `The pilot is on another flight with id ${id}`;
     },

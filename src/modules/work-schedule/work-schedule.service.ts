@@ -9,15 +9,30 @@ import {
 } from './dto/create-work-schedule.dto';
 import { FGetListWorkScheduleDto } from './dto/get-list-work-schedule.dto';
 import { ROLE, WORK_SCHEDULE_STATUS } from '@prisma/client';
-import { checkValidTime } from 'src/utils/function.utils';
 import { UserDataType } from 'src/common/types/user-data.type';
+import { checkSameDay, getDateWithoutTime } from 'src/utils/function.utils';
 
 @Injectable()
 export class WorkScheduleService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createWorkSchedule(workSchedule: CreateWorkScheduleDto) {
-    checkValidTime(workSchedule.startTime, workSchedule.endTime);
+    const dateWithoutTime = getDateWithoutTime(workSchedule.date);
+
+    if (workSchedule.startTime >= workSchedule.endTime) {
+      throw new BadRequestException(
+        MessageResponse.COMMON.INVALID_TIME_START_AND_END,
+      );
+    }
+
+    if (
+      !checkSameDay(workSchedule.startTime, workSchedule.endTime) ||
+      !checkSameDay(workSchedule.startTime, dateWithoutTime)
+    ) {
+      throw new BadRequestException(
+        MessageResponse.COMMON.INVALID_TIME_START_AND_END,
+      );
+    }
 
     const userFound = await this.prisma.user.findUnique({
       where: { id: workSchedule.userId },
@@ -27,10 +42,18 @@ export class WorkScheduleService {
       throw new BadRequestException(MessageResponse.USER.NOT_EXIST);
     }
 
+    const workScheduleFound = await this.prisma.workSchedule.findFirst({
+      where: { date: dateWithoutTime },
+    });
+
+    if (workScheduleFound) {
+      throw new BadRequestException(MessageResponse.WORK_SCHEDULE.EXIST);
+    }
+
     const newWorkSchedule = await this.prisma.workSchedule.create({
       data: {
         ...workSchedule,
-        date: new Date(workSchedule.date),
+        date: dateWithoutTime,
       },
     });
     return {
@@ -44,42 +67,57 @@ export class WorkScheduleService {
     updateWorkSchedule: UpdateWorkScheduleDto,
   ) {
     if (
-      (updateWorkSchedule!.startTime && !updateWorkSchedule!.endTime) ||
-      (!updateWorkSchedule!.startTime && updateWorkSchedule!.endTime)
+      updateWorkSchedule!.startTime &&
+      updateWorkSchedule!.endTime &&
+      updateWorkSchedule!.startTime >= updateWorkSchedule!.endTime
     ) {
-      throw new BadRequestException(MessageResponse.WORK_SCHEDULE.ERROR_DATE);
-    }
-
-    if (updateWorkSchedule!.startTime) {
-      checkValidTime(
-        updateWorkSchedule!.startTime,
-        updateWorkSchedule!.endTime,
+      throw new BadRequestException(
+        MessageResponse.COMMON.INVALID_TIME_START_AND_END,
       );
     }
 
-    const workScheduleFound = await this.prisma.workSchedule.findUnique({
-      where: { id },
+    if (
+      !checkSameDay(updateWorkSchedule.startTime, updateWorkSchedule.endTime) ||
+      !checkSameDay(updateWorkSchedule.startTime, updateWorkSchedule.date)
+    ) {
+      throw new BadRequestException(
+        MessageResponse.COMMON.INVALID_TIME_START_AND_END,
+      );
+    }
+
+    const workScheduleFound = await this.prisma.workSchedule.findFirst({
+      where: { id, date: updateWorkSchedule.date },
     });
 
     if (!workScheduleFound) {
       throw new BadRequestException(MessageResponse.WORK_SCHEDULE.NOT_EXIST);
     }
 
-    let dataUpdate = {};
-    if (updateWorkSchedule?.date) {
-      dataUpdate = {
-        ...updateWorkSchedule,
-        date: new Date(updateWorkSchedule?.date),
-      };
-    } else {
-      dataUpdate = updateWorkSchedule;
+    if (
+      updateWorkSchedule!.startTime &&
+      !updateWorkSchedule!.endTime &&
+      !checkSameDay(updateWorkSchedule.startTime, workScheduleFound.endTime)
+    ) {
+      throw new BadRequestException(
+        MessageResponse.COMMON.INVALID_TIME_START_AND_END,
+      );
+    }
+
+    if (
+      !updateWorkSchedule!.startTime &&
+      updateWorkSchedule!.endTime &&
+      !checkSameDay(workScheduleFound.startTime, workScheduleFound.endTime)
+    ) {
+      throw new BadRequestException(
+        MessageResponse.COMMON.INVALID_TIME_START_AND_END,
+      );
     }
 
     const workScheduleUpdate = await this.prisma.workSchedule.update({
       where: {
         id,
       },
-      data: dataUpdate,
+      data: updateWorkSchedule,
     });
     return {
       message: MessageResponse.WORK_SCHEDULE.UPDATE_SUCCESS,
