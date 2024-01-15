@@ -63,10 +63,6 @@ export class UpdateWorkScheduleDto {
   @IsDateString()
   @IsOptional()
   endTime?: string;
-
-  // @Transform( ({ value }) => value && new Date(value))
-  @IsDateString()
-  date: Date;
 }
 
 export class RequestUpdateWorkScheduleDto {

@@ -43,12 +43,7 @@ enum FLIGHT_SCHEDULE_STATUS {
 }
 
 model User {
-    id       Int       @id @default(autoincrement())
-    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
-    createBy Int?      @map("create_by")
-    isDelete Int?      @default(0) @map("is_delete")
-    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
-    updateBy Int?      @map("update_by")
+    id Int @id @default(autoincrement())
 
     email        String    @unique
     firstName    String
@@ -69,32 +64,42 @@ model User {
 
     userRole UserRole[]
 
-    @@map("user")
-}
-
-model Role {
-    id       Int       @id @default(autoincrement())
     createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
     createBy Int?      @map("create_by")
     isDelete Int?      @default(0) @map("is_delete")
     updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
     updateBy Int?      @map("update_by")
 
-    name     String
-    UserRole UserRole[]
+    @@map("user")
+}
+
+model Role {
+    id Int @id @default(autoincrement())
+
+    name           String
+    userRole       UserRole[]
+    rolePermission RolePermission[]
+
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
 
     @@map("role")
 }
 
 model Permission {
-    id       Int       @id @default(autoincrement())
+    id Int @id @default(autoincrement())
+
+    action         String
+    rolePermission RolePermission[]
+
     createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
     createBy Int?      @map("create_by")
     isDelete Int?      @default(0) @map("is_delete")
     updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
     updateBy Int?      @map("update_by")
-
-    action String
 
     @@map("permission")
 }
@@ -110,20 +115,17 @@ model UserRole {
 }
 
 model RolePermission {
-    permissioId Int @map("permission_id")
-    roleId      Int @map("role_id")
+    permissioId Int        @map("permission_id")
+    roleId      Int        @map("role_id")
+    permission  Permission @relation(fields: [permissioId], references: [id])
+    role        Role       @relation(fields: [roleId], references: [id])
 
     @@unique([permissioId, roleId])
     @@map("role_permission")
 }
 
 model Route {
-    id       Int       @id @default(autoincrement())
-    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
-    createBy Int?      @map("create_by")
-    isDelete Int?      @default(0) @map("is_delete")
-    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
-    updateBy Int?      @map("update_by")
+    id Int @id @default(autoincrement())
 
     locations    Json
     description  String?
@@ -135,17 +137,17 @@ model Route {
     flightSchedule         FlightSchedule[]
     adventureOparatingTime AdventureOperatingTime[]
 
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
+
     @@map("route")
 }
 
 model FlightSchedule {
-    id       Int                     @id @default(autoincrement())
-    createAt DateTime?               @default(now()) @map("create_at") @db.Timestamp(0)
-    createBy Int?                    @map("create_by")
-    isDelete Int?                    @default(0) @map("is_delete")
-    updateAt DateTime?               @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
-    updateBy Int?                    @map("update_by")
-    status   FLIGHT_SCHEDULE_STATUS?
+    id Int @id @default(autoincrement())
 
     routeId      Int        @map("route_id")
     helicopterId Int        @map("helicopter_id")
@@ -156,13 +158,20 @@ model FlightSchedule {
     start             DateTime
     end               DateTime
     duration          Int
-    isAllowMatchOther Boolean    @default(false) @map("is_allow_match_other")
+    isAllowMatchOther Boolean                 @default(false) @map("is_allow_match_other")
     price             Int
     capacity          Int
     type              ROUTE_TYPE
+    status            FLIGHT_SCHEDULE_STATUS?
 
     userFlightSchedule        UserFlightSchedule[]
     NoteRequestHireHelicopter NoteRequestHireHelicopter[]
+
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
 
     @@map("flight_schedule")
 }
@@ -173,17 +182,14 @@ model UserFlightSchedule {
     user             User           @relation(fields: [userId], references: [id])
     flightSchedule   FlightSchedule @relation(fields: [flightScheduleId], references: [id])
 
+    price Int @default(0)
+
     @@unique([userId, flightScheduleId])
     @@map("user_flight_schedule")
 }
 
 model WorkSchedule {
-    id       Int       @id @default(autoincrement())
-    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
-    createBy Int?      @map("create_by")
-    isDelete Int?      @default(0) @map("is_delete")
-    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
-    updateBy Int?      @map("update_by")
+    id Int @id @default(autoincrement())
 
     userId Int  @map("user_id")
     user   User @relation(fields: [userId], references: [id])
@@ -195,16 +201,17 @@ model WorkSchedule {
     status                        WORK_SCHEDULE_STATUS?           @default(APPLY)
     NoteRequestChangeWorkSchedule NoteRequestChangeWorkSchedule[]
 
-    @@map("work_schedule")
-}
-
-model Helicopter {
-    id       Int       @id @default(autoincrement())
     createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
     createBy Int?      @map("create_by")
     isDelete Int?      @default(0) @map("is_delete")
     updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
     updateBy Int?      @map("update_by")
+
+    @@map("work_schedule")
+}
+
+model Helicopter {
+    id Int @id @default(autoincrement())
 
     // capacity    Json
     name        String  @unique
@@ -217,16 +224,17 @@ model Helicopter {
 
     flightSchedule FlightSchedule[]
 
-    @@map("helicopter")
-}
-
-model AdventureOperatingTime {
-    id       Int       @id @default(autoincrement())
     createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
     createBy Int?      @map("create_by")
     isDelete Int?      @default(0) @map("is_delete")
     updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
     updateBy Int?      @map("update_by")
+
+    @@map("helicopter")
+}
+
+model AdventureOperatingTime {
+    id Int @id @default(autoincrement())
 
     routeId Int   @map("route_id")
     route   Route @relation(fields: [routeId], references: [id])
@@ -237,16 +245,17 @@ model AdventureOperatingTime {
     endAfternoon   DateTime?
     date           DateTime  @db.Timestamp(0)
 
-    @@map("adventure_operating_time")
-}
-
-model NoteRequestChangeWorkSchedule {
-    id       Int       @id @default(autoincrement())
     createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
     createBy Int?      @map("create_by")
     isDelete Int?      @default(0) @map("is_delete")
     updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
     updateBy Int?      @map("update_by")
+
+    @@map("adventure_operating_time")
+}
+
+model NoteRequestChangeWorkSchedule {
+    id Int @id @default(autoincrement())
 
     userId         Int          @map("user_id")
     user           User         @relation(fields: [userId], references: [id])
@@ -256,16 +265,17 @@ model NoteRequestChangeWorkSchedule {
     message String
     role    ROLE
 
-    @@map("note_request_change_work_schedule")
-}
-
-model NoteRequestHireHelicopter {
-    id       Int       @id @default(autoincrement())
     createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
     createBy Int?      @map("create_by")
     isDelete Int?      @default(0) @map("is_delete")
     updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
     updateBy Int?      @map("update_by")
+
+    @@map("note_request_change_work_schedule")
+}
+
+model NoteRequestHireHelicopter {
+    id Int @id @default(autoincrement())
 
     userId           Int            @map("user_id")
     user             User           @relation(fields: [userId], references: [id])
@@ -275,19 +285,26 @@ model NoteRequestHireHelicopter {
     message String
     role    ROLE
 
-    @@map("note_request_hire_helicopter")
-}
-
-model Configuration {
-    id       Int       @id @default(autoincrement())
     createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
     createBy Int?      @map("create_by")
     isDelete Int?      @default(0) @map("is_delete")
     updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
     updateBy Int?      @map("update_by")
 
+    @@map("note_request_hire_helicopter")
+}
+
+model Configuration {
+    id Int @id @default(autoincrement())
+
     key   String
     value String
+
+    createAt DateTime? @default(now()) @map("create_at") @db.Timestamp(0)
+    createBy Int?      @map("create_by")
+    isDelete Int?      @default(0) @map("is_delete")
+    updateAt DateTime? @default(now()) @updatedAt() @map("update_at") @db.Timestamp(0)
+    updateBy Int?      @map("update_by")
 
     @@map("configuration")
 }

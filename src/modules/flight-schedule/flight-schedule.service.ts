@@ -71,10 +71,10 @@ export class FlightScheduleService {
     }
 
     if (
-      (createFlightScheduleDto.start <
+      (new Date(createFlightScheduleDto.start) <
         adventureOperatingTimeFound.startMorning ||
         endTime > adventureOperatingTimeFound.endMorning) &&
-      (createFlightScheduleDto.start <
+      (new Date(createFlightScheduleDto.start) <
         adventureOperatingTimeFound.startAfternoon ||
         endTime > adventureOperatingTimeFound.endAfternoon)
     ) {
@@ -116,7 +116,7 @@ export class FlightScheduleService {
     }
 
     const timeStartDelay = new Date(createFlightScheduleDto.start);
-    timeStartDelay.setMinutes(timeStartDelay.getMinutes() - 15);
+    timeStartDelay.setSeconds(timeStartDelay.getSeconds() - (15 * 60 - 1));
 
     const flightSchedule = await this.prisma.flightSchedule.findMany({
       where: {
@@ -124,7 +124,7 @@ export class FlightScheduleService {
           lte: createFlightScheduleDto.start,
         },
         end: {
-          gt: timeStartDelay,
+          gte: timeStartDelay,
         },
       },
     });
@@ -141,7 +141,7 @@ export class FlightScheduleService {
           lte: createFlightScheduleDto.start,
         },
         end: {
-          gt: timeStartDelay,
+          gte: timeStartDelay,
         },
       },
     });
@@ -157,7 +157,7 @@ export class FlightScheduleService {
           lte: createFlightScheduleDto.start,
         },
         end: {
-          gt: timeStartDelay,
+          gte: timeStartDelay,
         },
         userFlightSchedule: {
           some: {
@@ -188,7 +188,7 @@ export class FlightScheduleService {
           lte: createFlightScheduleDto.start,
         },
         end: {
-          gt: timeStartDelay,
+          gte: timeStartDelay,
         },
         userFlightSchedule: {
           some: {

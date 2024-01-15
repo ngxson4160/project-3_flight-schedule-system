@@ -43,7 +43,7 @@ export class WorkScheduleService {
     }
 
     const workScheduleFound = await this.prisma.workSchedule.findFirst({
-      where: { date: dateWithoutTime },
+      where: { date: dateWithoutTime, userId: workSchedule.userId },
     });
 
     if (workScheduleFound) {
@@ -77,8 +77,7 @@ export class WorkScheduleService {
     }
 
     if (
-      !checkSameDay(updateWorkSchedule.startTime, updateWorkSchedule.endTime) ||
-      !checkSameDay(updateWorkSchedule.startTime, updateWorkSchedule.date)
+      !checkSameDay(updateWorkSchedule.startTime, updateWorkSchedule.endTime)
     ) {
       throw new BadRequestException(
         MessageResponse.COMMON.INVALID_TIME_START_AND_END,
@@ -86,7 +85,7 @@ export class WorkScheduleService {
     }
 
     const workScheduleFound = await this.prisma.workSchedule.findFirst({
-      where: { id, date: updateWorkSchedule.date },
+      where: { id },
     });
 
     if (!workScheduleFound) {
@@ -95,8 +94,7 @@ export class WorkScheduleService {
 
     if (
       updateWorkSchedule!.startTime &&
-      !updateWorkSchedule!.endTime &&
-      !checkSameDay(updateWorkSchedule.startTime, workScheduleFound.endTime)
+      !checkSameDay(updateWorkSchedule.startTime, workScheduleFound.date)
     ) {
       throw new BadRequestException(
         MessageResponse.COMMON.INVALID_TIME_START_AND_END,
@@ -104,9 +102,8 @@ export class WorkScheduleService {
     }
 
     if (
-      !updateWorkSchedule!.startTime &&
-      updateWorkSchedule!.endTime &&
-      !checkSameDay(workScheduleFound.startTime, workScheduleFound.endTime)
+      !updateWorkSchedule!.endTime &&
+      !checkSameDay(updateWorkSchedule.endTime, workScheduleFound.date)
     ) {
       throw new BadRequestException(
         MessageResponse.COMMON.INVALID_TIME_START_AND_END,
