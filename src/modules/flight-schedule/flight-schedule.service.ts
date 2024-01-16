@@ -919,7 +919,7 @@ export class FlightScheduleService {
       data: {
         ...timeUpdate,
         status: resolveHireHelicopter.isAccept
-          ? FLIGHT_SCHEDULE_STATUS.ACCEPT_HIRE
+          ? FLIGHT_SCHEDULE_STATUS.BOOKING_SUCCESS
           : FLIGHT_SCHEDULE_STATUS.REJECT_HIRE,
       },
     });
