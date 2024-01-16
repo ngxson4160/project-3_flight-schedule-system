@@ -13,6 +13,7 @@ import { getDateWithoutTime } from 'src/utils/function.utils';
 import { UserDataType } from 'src/common/types/user-data.type';
 import { FGetAvailableResourceDto } from './dto/get-available-resource.dto';
 import { RequestHireHelicopterDto } from './dto/request-hire-helicopter.dto';
+import { ResolveHireHelicopterDto } from './dto/resolve-hire-helicopter.dto';
 
 @Injectable()
 export class FlightScheduleService {
@@ -835,6 +836,107 @@ export class FlightScheduleService {
         pilotId: requestHireDto.pilotId,
         tourGuideId: requestHireDto.tourGuideId,
       },
+    };
+  }
+
+  async resolveHireHelicopter(
+    id: number,
+    adminInfo: UserDataType,
+    resolveHireHelicopter: ResolveHireHelicopterDto,
+  ) {
+    if (
+      resolveHireHelicopter.start &&
+      resolveHireHelicopter.end &&
+      resolveHireHelicopter.start >= resolveHireHelicopter.end
+    ) {
+      throw new BadRequestException(
+        MessageResponse.COMMON.INVALID_TIME_START_AND_END,
+      );
+    }
+
+    if (resolveHireHelicopter.price && !resolveHireHelicopter.isAccept) {
+      throw new BadRequestException(
+        MessageResponse.FLIGHT_SCHEDULE.INVALID_RESOLVE_HIRE_PRICE,
+      );
+    }
+
+    const adminFound = await this.prisma.user.findUnique({
+      where: { id: adminInfo.id },
+    });
+    if (!adminFound) {
+      throw new BadRequestException(MessageResponse.USER.NOT_EXIST);
+    }
+
+    const flightScheduleHireFound = await this.prisma.flightSchedule.findFirst({
+      where: {
+        id,
+        type: ROUTE_TYPE.HIRE,
+      },
+    });
+    if (!flightScheduleHireFound) {
+      throw new BadRequestException(
+        MessageResponse.FLIGHT_SCHEDULE.NOT_EXIST_REQUEST_HIRE,
+      );
+    }
+
+    const noteResolveHireChangeFound =
+      await this.prisma.noteRequestHireHelicopter.findFirst({
+        where: {
+          flightScheduleId: flightScheduleHireFound.id,
+          userId: adminInfo.id,
+        },
+      });
+    if (noteResolveHireChangeFound) {
+      await this.prisma.noteRequestHireHelicopter.update({
+        where: { id: noteResolveHireChangeFound.id },
+        data: {
+          message: resolveHireHelicopter.reason,
+        },
+      });
+    } else {
+      await this.prisma.noteRequestHireHelicopter.create({
+        data: {
+          userId: adminInfo.id,
+          flightScheduleId: flightScheduleHireFound.id,
+          message: resolveHireHelicopter.reason,
+          role: adminInfo.role,
+        },
+      });
+    }
+
+    let timeUpdate = {};
+    if (resolveHireHelicopter.start) {
+      timeUpdate = { ...timeUpdate, start: resolveHireHelicopter.start };
+    }
+    if (resolveHireHelicopter.end) {
+      timeUpdate = { ...timeUpdate, end: resolveHireHelicopter.end };
+    }
+
+    await this.prisma.flightSchedule.update({
+      where: {
+        id: flightScheduleHireFound.id,
+      },
+      data: {
+        ...timeUpdate,
+        status: resolveHireHelicopter.isAccept
+          ? FLIGHT_SCHEDULE_STATUS.ACCEPT_HIRE
+          : FLIGHT_SCHEDULE_STATUS.REJECT_HIRE,
+      },
+    });
+
+    if (resolveHireHelicopter.price) {
+      await this.prisma.userFlightSchedule.updateMany({
+        where: {
+          flightScheduleId: flightScheduleHireFound.id,
+        },
+        data: {
+          price: resolveHireHelicopter.price,
+        },
+      });
+    }
+
+    return {
+      message: MessageResponse.FLIGHT_SCHEDULE.RESOLVE_HIRE_SUCCESS,
     };
   }
 }

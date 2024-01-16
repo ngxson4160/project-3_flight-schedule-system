@@ -81,6 +81,7 @@ export const MessageResponse = {
 
   FLIGHT_SCHEDULE: {
     NOT_EXIST: 'Flight schedule not exist!',
+    NOT_EXIST_REQUEST_HIRE: 'Request hire helicopter not exist!',
     EXCEED_NUMBER: 'Exceed the number of helicopters flying at the same time',
     EXCEED_NUMBER_SAME_ROUTE:
       'Exceeding the number of helicopters flying on the same route at the same time',
@@ -98,5 +99,8 @@ export const MessageResponse = {
     FLIGHT_NOT_BELONG_TO_USER: 'Flight schedule not belong to custom!',
     INVALID_TIME_CANCEL:
       'Cancellation time exceeded (can only be canceled within 1 hour)!',
+    RESOLVE_HIRE_SUCCESS: 'Resolve hire helicopter successfully',
+    INVALID_RESOLVE_HIRE_PRICE:
+      'Prices cannot be added when helicopter rentals are not accepted',
   },
 };

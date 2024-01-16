@@ -103,5 +103,6 @@ export class ResolveUpdateWorkScheduleDto {
   endTime?: string;
 
   @IsOptional()
+  @IsString()
   reason?: string;
 }

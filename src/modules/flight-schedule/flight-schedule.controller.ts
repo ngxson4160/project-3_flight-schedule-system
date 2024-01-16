@@ -9,6 +9,7 @@ import { FGetListFlightScheduleDto } from './dto/get-list-flight-schedule.dto';
 import { userInfo } from 'os';
 import { FGetAvailableResourceDto } from './dto/get-available-resource.dto';
 import { RequestHireHelicopterDto } from './dto/request-hire-helicopter.dto';
+import { ResolveHireHelicopterDto } from './dto/resolve-hire-helicopter.dto';
 
 @Controller('flight-schedules')
 export class FlightScheduleController {
@@ -58,6 +59,20 @@ export class FlightScheduleController {
     return this.flightScheduleService.requestHireHelicopter(
       customerInfo.id,
       requestHireDto,
+    );
+  }
+
+  @Role(ROLE.ADMIN)
+  @Post(':id/resolve-hire-helicopter')
+  async resolveHireHelicopter(
+    @Param('id') id: string,
+    @UserData() adminInfo: UserDataType,
+    @Body() resolveHireHelicopter: ResolveHireHelicopterDto,
+  ) {
+    return this.flightScheduleService.resolveHireHelicopter(
+      +id,
+      adminInfo,
+      resolveHireHelicopter,
     );
   }
 }
