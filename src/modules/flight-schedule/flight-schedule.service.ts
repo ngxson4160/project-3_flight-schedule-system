@@ -14,6 +14,7 @@ import { UserDataType } from 'src/common/types/user-data.type';
 import { FGetAvailableResourceDto } from './dto/get-available-resource.dto';
 import { RequestHireHelicopterDto } from './dto/request-hire-helicopter.dto';
 import { ResolveHireHelicopterDto } from './dto/resolve-hire-helicopter.dto';
+import { UpdateFlightScheduleDto } from './dto/update-flight-schedule.dto';
 
 @Injectable()
 export class FlightScheduleService {
@@ -320,6 +321,12 @@ export class FlightScheduleService {
     }
     if (filter.end) {
       whereQuery = { ...whereQuery, end: { lte: filter.end } };
+    }
+    if (filter.startDate) {
+      whereQuery = { ...whereQuery, date: { gte: filter.startDate } };
+    }
+    if (filter.end) {
+      whereQuery = { ...whereQuery, date: { lte: filter.endDate } };
     }
     if (filter.userId) {
       whereQuery = {
@@ -937,6 +944,324 @@ export class FlightScheduleService {
 
     return {
       message: MessageResponse.FLIGHT_SCHEDULE.RESOLVE_HIRE_SUCCESS,
+    };
+  }
+
+  async updateAdventureFlightSchedule(
+    id: number,
+    customerId: number,
+    updateFlightScheduleDto: UpdateFlightScheduleDto,
+  ) {
+    const customerFound = await this.prisma.user.findUnique({
+      where: { id: customerId, role: ROLE.CUSTOMER },
+    });
+    if (!customerFound) {
+      throw new BadRequestException(MessageResponse.USER.CUSTOMER_NOT_EXIST);
+    }
+
+    const flightScheduleFound = await this.prisma.flightSchedule.findUnique({
+      where: { id },
+      include: {
+        userFlightSchedule: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                role: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!flightScheduleFound) {
+      throw new BadRequestException(MessageResponse.FLIGHT_SCHEDULE.NOT_EXIST);
+    }
+    console.log(flightScheduleFound);
+
+    let pilotIdFind;
+    if (updateFlightScheduleDto.pilotId) {
+      pilotIdFind = updateFlightScheduleDto.pilotId;
+    } else {
+      // pilotIdFind = flightScheduleFound.pilotId;
+    }
+    const pilotFound = await this.prisma.user.findUnique({
+      where: { id: updateFlightScheduleDto.pilotId, role: ROLE.PILOT },
+    });
+    if (!pilotFound) {
+      throw new BadRequestException(MessageResponse.USER.PILOT_NOT_EXIST);
+    }
+
+    const tourGuideFound = await this.prisma.user.findUnique({
+      where: { id: updateFlightScheduleDto.tourGuideId, role: ROLE.TOUR_GUIDE },
+    });
+    if (!tourGuideFound) {
+      throw new BadRequestException(MessageResponse.USER.TOUR_GUIDE_NOT_EXIST);
+    }
+
+    const routeFound = await this.prisma.route.findUnique({
+      where: { id: updateFlightScheduleDto.routeId },
+    });
+    if (!routeFound) {
+      throw new BadRequestException(MessageResponse.ROUTE.NOT_EXIST);
+    }
+
+    const helicopterFound = await this.prisma.helicopter.findUnique({
+      where: { id: updateFlightScheduleDto.helicopterId },
+    });
+    if (!helicopterFound) {
+      throw new BadRequestException(MessageResponse.HELICOPTER.NOT_EXIST);
+    }
+    if (helicopterFound.capacity < updateFlightScheduleDto.capacity) {
+      throw new BadRequestException(MessageResponse.HELICOPTER.EXCEED_CAPACITY);
+    }
+
+    let dateBooking;
+    if (updateFlightScheduleDto.start) {
+      dateBooking = getDateWithoutTime(updateFlightScheduleDto.start);
+    } else {
+      dateBooking = getDateWithoutTime(flightScheduleFound.start);
+    }
+
+    const endTime = new Date(updateFlightScheduleDto.start);
+    endTime.setMinutes(endTime.getMinutes() + routeFound.duration / 60);
+
+    const adventureOperatingTimeFound =
+      await this.prisma.adventureOperatingTime.findFirst({
+        where: { date: dateBooking },
+      });
+
+    if (!adventureOperatingTimeFound) {
+      throw new BadRequestException(
+        MessageResponse.ADVENTURE_OPERATING_TIME.NOT_EXIST,
+      );
+    }
+
+    if (
+      (new Date(updateFlightScheduleDto.start) <
+        adventureOperatingTimeFound.startMorning ||
+        endTime > adventureOperatingTimeFound.endMorning) &&
+      (new Date(updateFlightScheduleDto.start) <
+        adventureOperatingTimeFound.startAfternoon ||
+        endTime > adventureOperatingTimeFound.endAfternoon)
+    ) {
+      throw new BadRequestException(
+        MessageResponse.ADVENTURE_OPERATING_TIME.OUTSIDE_OF_OPERATING_HOURS,
+      );
+    }
+
+    const pilotWorkScheduleFound = await this.prisma.workSchedule.findFirst({
+      where: {
+        userId: updateFlightScheduleDto.pilotId,
+        date: dateBooking,
+        startTime: { lte: updateFlightScheduleDto.start },
+        endTime: { gte: endTime },
+        status: WORK_SCHEDULE_STATUS.APPLY,
+      },
+    });
+    if (!pilotWorkScheduleFound) {
+      throw new BadRequestException(
+        MessageResponse.WORK_SCHEDULE.PILOT_OUTSIDE_OF_OPERATING_HOURS,
+      );
+    }
+
+    const tourGuideWorkScheduleFound = await this.prisma.workSchedule.findFirst(
+      {
+        where: {
+          userId: updateFlightScheduleDto.tourGuideId,
+          date: dateBooking,
+          startTime: { lte: updateFlightScheduleDto.start },
+          endTime: { gte: endTime },
+          status: WORK_SCHEDULE_STATUS.APPLY,
+        },
+      },
+    );
+    if (!tourGuideWorkScheduleFound) {
+      throw new BadRequestException(
+        MessageResponse.WORK_SCHEDULE.TOUR_GUIDE_OUTSIDE_OF_OPERATING_HOURS,
+      );
+    }
+
+    const timeStartDelay = new Date(updateFlightScheduleDto.start);
+    timeStartDelay.setSeconds(timeStartDelay.getSeconds() - (15 * 60 - 1));
+
+    const flightSchedule = await this.prisma.flightSchedule.findMany({
+      where: {
+        start: {
+          lte: updateFlightScheduleDto.start,
+        },
+        end: {
+          gte: timeStartDelay,
+        },
+      },
+    });
+    if (flightSchedule.length >= 2) {
+      throw new BadRequestException(
+        MessageResponse.FLIGHT_SCHEDULE.EXCEED_NUMBER,
+      );
+    }
+
+    const sameRouteFlightSchedule = await this.prisma.flightSchedule.findMany({
+      where: {
+        routeId: updateFlightScheduleDto.routeId,
+        start: {
+          lte: updateFlightScheduleDto.start,
+        },
+        end: {
+          gte: timeStartDelay,
+        },
+        status: FLIGHT_SCHEDULE_STATUS.BOOKING_SUCCESS,
+      },
+    });
+    if (sameRouteFlightSchedule.length > 0) {
+      throw new BadRequestException(
+        MessageResponse.FLIGHT_SCHEDULE.EXCEED_NUMBER_SAME_ROUTE,
+      );
+    }
+
+    const pilotFlightSchedule = await this.prisma.flightSchedule.findFirst({
+      where: {
+        start: {
+          lte: updateFlightScheduleDto.start,
+        },
+        end: {
+          gte: timeStartDelay,
+        },
+        userFlightSchedule: {
+          some: {
+            userId: updateFlightScheduleDto.pilotId,
+          },
+        },
+        status: FLIGHT_SCHEDULE_STATUS.BOOKING_SUCCESS,
+      },
+      include: {
+        userFlightSchedule: {
+          where: {
+            userId: updateFlightScheduleDto.pilotId,
+          },
+        },
+      },
+    });
+
+    if (pilotFlightSchedule) {
+      throw new BadRequestException(
+        MessageResponse.FLIGHT_SCHEDULE.PILOT_IN_PROCESS(
+          pilotFlightSchedule.id,
+        ),
+      );
+    }
+
+    const tourGuideFlightSchedule = await this.prisma.flightSchedule.findFirst({
+      where: {
+        start: {
+          lte: updateFlightScheduleDto.start,
+        },
+        end: {
+          gte: timeStartDelay,
+        },
+        userFlightSchedule: {
+          some: {
+            userId: updateFlightScheduleDto.tourGuideId,
+          },
+        },
+        status: FLIGHT_SCHEDULE_STATUS.BOOKING_SUCCESS,
+      },
+      include: {
+        userFlightSchedule: {
+          where: {
+            userId: updateFlightScheduleDto.tourGuideId,
+          },
+        },
+      },
+    });
+
+    if (tourGuideFlightSchedule) {
+      throw new BadRequestException(
+        MessageResponse.FLIGHT_SCHEDULE.TOUR_GUIDE_IN_PROCESS(
+          tourGuideFlightSchedule.id,
+        ),
+      );
+    }
+
+    const helicopterFlightSchedule = await this.prisma.flightSchedule.findFirst(
+      {
+        where: {
+          helicopterId: updateFlightScheduleDto.helicopterId,
+          start: {
+            lte: updateFlightScheduleDto.start,
+          },
+          end: {
+            gte: timeStartDelay,
+          },
+          status: FLIGHT_SCHEDULE_STATUS.BOOKING_SUCCESS,
+        },
+      },
+    );
+
+    if (helicopterFlightSchedule) {
+      throw new BadRequestException(
+        MessageResponse.FLIGHT_SCHEDULE.HELICOPTER_IN_PROCESS(
+          helicopterFlightSchedule.id,
+        ),
+      );
+    }
+
+    // const dataCreateFlightSchedule = {
+    //   routeId: updateFlightScheduleDto.routeId,
+    //   helicopterId: updateFlightScheduleDto.helicopterId,
+    //   date: new Date(endTime.setHours(7, 0, 0, 0)),
+    //   start: updateFlightScheduleDto.start,
+    //   end: endTime,
+    //   duration: routeFound.duration,
+    //   status: FLIGHT_SCHEDULE_STATUS.BOOKING_SUCCESS,
+    //   price: routeFound.price ?? 0,
+    //   capacity: updateFlightScheduleDto.capacity,
+    // };
+
+    const dataCreateFlightSchedule = {
+      ...updateFlightScheduleDto,
+      end: new Date(endTime),
+      date: new Date(endTime.setHours(7, 0, 0, 0)),
+      status: FLIGHT_SCHEDULE_STATUS.BOOKING_SUCCESS,
+      duration: routeFound.duration,
+      price: routeFound.price ?? 0,
+      type: ROUTE_TYPE.ADVENTURE,
+    };
+    delete dataCreateFlightSchedule.pilotId;
+    delete dataCreateFlightSchedule.tourGuideId;
+
+    const createFlightSchedule = await this.prisma.flightSchedule.create({
+      data: dataCreateFlightSchedule,
+    });
+
+    await this.prisma.userFlightSchedule.create({
+      data: {
+        userId: customerId,
+        flightScheduleId: createFlightSchedule.id,
+      },
+    });
+    await this.prisma.userFlightSchedule.create({
+      data: {
+        userId: updateFlightScheduleDto.pilotId,
+        flightScheduleId: createFlightSchedule.id,
+        price: routeFound.price,
+      },
+    });
+    await this.prisma.userFlightSchedule.create({
+      data: {
+        userId: updateFlightScheduleDto.tourGuideId,
+        flightScheduleId: createFlightSchedule.id,
+      },
+    });
+
+    return {
+      message: MessageResponse.FLIGHT_SCHEDULE.CREATE_SUCCESS,
+      data: {
+        ...createFlightSchedule,
+        customerId,
+        pilotId: updateFlightScheduleDto.pilotId,
+        tourGuideId: updateFlightScheduleDto.tourGuideId,
+      },
     };
   }
 }

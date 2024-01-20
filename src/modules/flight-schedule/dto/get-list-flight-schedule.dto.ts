@@ -13,6 +13,14 @@ export class FGetListFlightScheduleDto {
   @IsOptional()
   end: Date;
 
+  @IsISO8601()
+  @IsOptional()
+  startDate: Date;
+
+  @IsISO8601()
+  @IsOptional()
+  endDate: Date;
+
   @IsEnum(FLIGHT_SCHEDULE_STATUS)
   @IsOptional()
   status: FLIGHT_SCHEDULE_STATUS;

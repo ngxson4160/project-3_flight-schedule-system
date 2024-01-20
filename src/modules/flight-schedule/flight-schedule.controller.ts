@@ -75,4 +75,18 @@ export class FlightScheduleController {
       resolveHireHelicopter,
     );
   }
+
+  // @Role(ROLE.ADMIN, ROLE.CUSTOMER)
+  // @Post(':id/resolve-hire-helicopter')
+  // async updateAdventureFlightSchedule(
+  //   @Param('id') id: string,
+  //   @UserData() adminInfo: UserDataType,
+  //   @Body() resolveHireHelicopter: ResolveHireHelicopterDto,
+  // ) {
+  //   return this.flightScheduleService.updateAdventureFlightSchedule(
+  //     +id,
+  //     adminInfo,
+  //     resolveHireHelicopter,
+  //   );
+  // }
 }
