@@ -62,7 +62,10 @@ export class UserService {
       where: { role: type },
     });
 
-    return listStaffFound;
+    return {
+      message: MessageResponse.USER.GET_PROFILE_SUCCESS,
+      data: listStaffFound,
+    };
   }
 
   // async requestUpdateWorkSchedule(
