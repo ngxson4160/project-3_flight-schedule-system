@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { FlightScheduleService } from './flight-schedule.service';
 import { UserData } from 'src/auth/decorator/user-info.decorator';
 import { UserDataType } from 'src/common/types/user-data.type';
@@ -29,7 +29,7 @@ export class FlightScheduleController {
 
   @Get()
   async getListFlightSchedule(
-    @Body() getListFlightScheduleDto: FGetListFlightScheduleDto,
+    @Query() getListFlightScheduleDto: FGetListFlightScheduleDto,
   ) {
     return this.flightScheduleService.getListFlightSchedule(
       getListFlightScheduleDto,

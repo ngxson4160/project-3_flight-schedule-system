@@ -361,12 +361,32 @@ export class FlightScheduleService {
             role: true,
           },
         },
+        userFlightSchedule: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                role: true,
+              },
+            },
+          },
+        },
       },
+    });
+
+    const modifiedListWorkSchedule = listWorkScheduleFound.map((schedule) => {
+      const users = schedule.userFlightSchedule.map(
+        (userSchedule) => userSchedule.user,
+      );
+      return { ...schedule, user: users, userFlightSchedule: undefined };
     });
 
     return {
       message: MessageResponse.WORK_SCHEDULE.GET_LIST_SUCCESS,
-      data: listWorkScheduleFound,
+      data: modifiedListWorkSchedule,
     };
   }
 

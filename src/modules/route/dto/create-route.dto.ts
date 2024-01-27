@@ -1,7 +1,16 @@
 import { ROUTE_TYPE } from '@prisma/client';
-import { IsArray, IsEnum, IsNumber, IsOptional } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateRouteDto {
+  @IsString()
+  name: string;
+
   @IsArray()
   locations: object;
 

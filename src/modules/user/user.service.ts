@@ -4,6 +4,7 @@ import { MessageResponse } from 'src/common/constants/message-response.constant'
 import { FGetListWorkScheduleDto } from '../work-schedule/dto/get-list-work-schedule.dto';
 import { UpdateWorkScheduleDto } from './dto/update-work-schedule';
 import { WORK_SCHEDULE_STATUS } from '@prisma/client';
+import { EStaff } from './dto/get-list-staff.dto';
 
 @Injectable()
 export class UserService {
@@ -54,6 +55,14 @@ export class UserService {
       message: MessageResponse.WORK_SCHEDULE.GET_LIST_SUCCESS,
       data: listWorkScheduleFound,
     };
+  }
+
+  async getListStaff(type: EStaff) {
+    const listStaffFound = await this.prisma.user.findMany({
+      where: { role: type },
+    });
+
+    return listStaffFound;
   }
 
   // async requestUpdateWorkSchedule(

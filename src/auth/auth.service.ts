@@ -127,4 +127,22 @@ export class AuthService {
       message: MessageResponse.AUTH.LOG_OUT_SUCCESS,
     };
   }
+
+  async getProfile(userEmail: string) {
+    const userFound = await this.prisma.user.findUnique({
+      where: { email: userEmail },
+    });
+
+    if (!userFound) {
+      throw new BadRequestException(MessageResponse.USER.NOT_EXIST);
+    }
+    delete userFound.password;
+    delete userFound.accessToken;
+    delete userFound.refreshToken;
+
+    return {
+      message: MessageResponse.USER.GET_PROFILE_SUCCESS,
+      data: userFound,
+    };
+  }
 }

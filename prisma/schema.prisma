@@ -127,6 +127,7 @@ model RolePermission {
 model Route {
     id Int @id @default(autoincrement())
 
+    name         String
     locations    Json
     description  String?
     flightLength Int

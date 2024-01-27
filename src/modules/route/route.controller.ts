@@ -19,7 +19,7 @@ export class RouteController {
 
   @Post()
   @Role(ROLE.ADMIN)
-  async createHelicopter(@Body() createRouteDto: CreateRouteDto) {
+  async createRoute(@Body() createRouteDto: CreateRouteDto) {
     return this.routeService.createRoute(createRouteDto);
   }
 
@@ -38,13 +38,13 @@ export class RouteController {
   }
 
   @Get()
-  async getListHelicopter() {
+  async getListRoute() {
     return this.routeService.getListRoute();
   }
 
   @Delete('/:id')
   @Role(ROLE.ADMIN)
-  async deleteHelicopter(@Param('id') id: string) {
+  async deleteRoute(@Param('id') id: string) {
     return this.routeService.deleteRoute(+id);
   }
 }

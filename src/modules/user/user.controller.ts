@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { FGetListWorkScheduleDto } from '../work-schedule/dto/get-list-work-schedule.dto';
 import { UserData } from 'src/auth/decorator/user-info.decorator';
@@ -6,6 +6,7 @@ import { Role } from 'src/auth/decorator/role.decorator';
 import { ROLE } from 'src/common/constants/enum.constant';
 import { UserDataType } from 'src/common/types/user-data.type';
 import { UpdateWorkScheduleDto } from './dto/update-work-schedule';
+import { EStaff } from './dto/get-list-staff.dto';
 
 @Controller('users')
 export class UserController {
@@ -21,6 +22,12 @@ export class UserController {
       userInfo.id,
       getWorkScheduleService,
     );
+  }
+
+  @Get()
+  @Role(ROLE.PILOT, ROLE.ADMIN, ROLE.TOUR_GUIDE)
+  async getListStaff(@Query('type') type: EStaff) {
+    return this.userService.getListStaff(type);
   }
 
   // @Put('/work-schedule/:id')

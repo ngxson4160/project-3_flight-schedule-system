@@ -17,6 +17,7 @@ export const MessageResponse = {
     CUSTOMER_NOT_EXIST: 'Customer not exist!',
     PILOT_NOT_EXIST: 'Pilot not exist!',
     TOUR_GUIDE_NOT_EXIST: 'Tour guide not exist!',
+    GET_PROFILE_SUCCESS: 'Get user profile successfully!',
   },
 
   AUTH: {
