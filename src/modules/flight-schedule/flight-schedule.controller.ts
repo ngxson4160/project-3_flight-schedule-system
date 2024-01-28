@@ -46,7 +46,7 @@ export class FlightScheduleController {
   }
 
   @Get('get-list-resources-available')
-  async getListResourcesAvailable(@Body() filter: FGetAvailableResourceDto) {
+  async getListResourcesAvailable(@Query() filter: FGetAvailableResourceDto) {
     return this.flightScheduleService.getListResourcesAvailable(filter);
   }
 

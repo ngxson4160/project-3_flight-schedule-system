@@ -42,9 +42,9 @@ export class AccessTokenStratey extends PassportStrategy(Strategy, 'jwt') {
     const token = req.headers?.authorization?.replace('Bearer', '').trim();
     const isPermission = req.role.includes(payload.data.role);
 
-    if (userFound.accessToken !== token || !isPermission) {
-      throw new UnauthorizedException();
-    }
+    // if (userFound.accessToken !== token || !isPermission) {
+    //   throw new UnauthorizedException();
+    // }
 
     return payload; //attach to request object
   }

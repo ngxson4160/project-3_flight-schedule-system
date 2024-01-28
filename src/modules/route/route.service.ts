@@ -59,7 +59,9 @@ export class RouteService {
   }
 
   async getListRoute() {
-    const listRouteFound = await this.prisma.route.findMany();
+    const listRouteFound = await this.prisma.route.findMany({
+      where: { isDelete: 0 },
+    });
 
     return {
       message: MessageResponse.ROUTE.GET_LIST_SUCCESS,
@@ -68,6 +70,7 @@ export class RouteService {
   }
 
   async deleteRoute(id: number) {
+    console.log(id);
     const routeFound = await this.prisma.route.findUnique({
       where: { id },
     });
@@ -76,9 +79,12 @@ export class RouteService {
       throw new BadRequestException(MessageResponse.ROUTE.NOT_EXIST);
     }
 
-    const deleteRoute = await this.prisma.route.delete({
+    const deleteRoute = await this.prisma.route.update({
       where: {
         id,
+      },
+      data: {
+        isDelete: 1,
       },
     });
 

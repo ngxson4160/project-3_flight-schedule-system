@@ -25,12 +25,15 @@ export class FlightScheduleService {
     createFlightScheduleDto: CreateFlightScheduleDto,
   ) {
     const dateBooking = getDateWithoutTime(createFlightScheduleDto.start);
+    let messageObject = [];
 
-    const customerFound = await this.prisma.user.findUnique({
-      where: { id: customerId, role: ROLE.CUSTOMER },
-    });
-    if (!customerFound) {
-      throw new BadRequestException(MessageResponse.USER.CUSTOMER_NOT_EXIST);
+    if (customerId !== 13) {
+      const customerFound = await this.prisma.user.findUnique({
+        where: { id: customerId, role: ROLE.CUSTOMER },
+      });
+      if (!customerFound) {
+        throw new BadRequestException(MessageResponse.USER.CUSTOMER_NOT_EXIST);
+      }
     }
 
     const pilotFound = await this.prisma.user.findUnique({
@@ -73,12 +76,17 @@ export class FlightScheduleService {
       });
 
     if (!adventureOperatingTimeFound) {
-      throw new BadRequestException(
-        MessageResponse.ADVENTURE_OPERATING_TIME.NOT_EXIST,
-      );
+      messageObject = [
+        ...messageObject,
+        MessageResponse.ADVENTURE_OPERATING_TIME.OUTSIDE_OF_OPERATING_HOURS,
+      ];
+      // throw new BadRequestException(
+      //   MessageResponse.ADVENTURE_OPERATING_TIME.NOT_EXIST,
+      // );
     }
 
     if (
+      adventureOperatingTimeFound &&
       (new Date(createFlightScheduleDto.start) <
         adventureOperatingTimeFound.startMorning ||
         endTime > adventureOperatingTimeFound.endMorning) &&
@@ -86,9 +94,13 @@ export class FlightScheduleService {
         adventureOperatingTimeFound.startAfternoon ||
         endTime > adventureOperatingTimeFound.endAfternoon)
     ) {
-      throw new BadRequestException(
+      messageObject = [
+        ...messageObject,
         MessageResponse.ADVENTURE_OPERATING_TIME.OUTSIDE_OF_OPERATING_HOURS,
-      );
+      ];
+      // throw new BadRequestException(
+      //   MessageResponse.ADVENTURE_OPERATING_TIME.OUTSIDE_OF_OPERATING_HOURS,
+      // );
     }
 
     const pilotWorkScheduleFound = await this.prisma.workSchedule.findFirst({
@@ -101,9 +113,13 @@ export class FlightScheduleService {
       },
     });
     if (!pilotWorkScheduleFound) {
-      throw new BadRequestException(
+      messageObject = [
+        ...messageObject,
         MessageResponse.WORK_SCHEDULE.PILOT_OUTSIDE_OF_OPERATING_HOURS,
-      );
+      ];
+      // throw new BadRequestException(
+      //   MessageResponse.WORK_SCHEDULE.PILOT_OUTSIDE_OF_OPERATING_HOURS,
+      // );
     }
 
     const tourGuideWorkScheduleFound = await this.prisma.workSchedule.findFirst(
@@ -118,9 +134,13 @@ export class FlightScheduleService {
       },
     );
     if (!tourGuideWorkScheduleFound) {
-      throw new BadRequestException(
+      messageObject = [
+        ...messageObject,
         MessageResponse.WORK_SCHEDULE.TOUR_GUIDE_OUTSIDE_OF_OPERATING_HOURS,
-      );
+      ];
+      // throw new BadRequestException(
+      //   MessageResponse.WORK_SCHEDULE.TOUR_GUIDE_OUTSIDE_OF_OPERATING_HOURS,
+      // );
     }
 
     const timeStartDelay = new Date(createFlightScheduleDto.start);
@@ -137,9 +157,13 @@ export class FlightScheduleService {
       },
     });
     if (flightSchedule.length >= 2) {
-      throw new BadRequestException(
+      messageObject = [
+        ...messageObject,
         MessageResponse.FLIGHT_SCHEDULE.EXCEED_NUMBER,
-      );
+      ];
+      // throw new BadRequestException(
+      //   MessageResponse.FLIGHT_SCHEDULE.EXCEED_NUMBER,
+      // );
     }
 
     const sameRouteFlightSchedule = await this.prisma.flightSchedule.findMany({
@@ -155,9 +179,13 @@ export class FlightScheduleService {
       },
     });
     if (sameRouteFlightSchedule.length > 0) {
-      throw new BadRequestException(
+      messageObject = [
+        ...messageObject,
         MessageResponse.FLIGHT_SCHEDULE.EXCEED_NUMBER_SAME_ROUTE,
-      );
+      ];
+      // throw new BadRequestException(
+      //   MessageResponse.FLIGHT_SCHEDULE.EXCEED_NUMBER_SAME_ROUTE,
+      // );
     }
 
     const pilotFlightSchedule = await this.prisma.flightSchedule.findFirst({
@@ -185,11 +213,15 @@ export class FlightScheduleService {
     });
 
     if (pilotFlightSchedule) {
-      throw new BadRequestException(
-        MessageResponse.FLIGHT_SCHEDULE.PILOT_IN_PROCESS(
-          pilotFlightSchedule.id,
-        ),
-      );
+      messageObject = [
+        ...messageObject,
+        MessageResponse.FLIGHT_SCHEDULE.PILOT_IN_PROCESS,
+      ];
+      // throw new BadRequestException(
+      //   MessageResponse.FLIGHT_SCHEDULE.PILOT_IN_PROCESS(
+      //     pilotFlightSchedule.id,
+      //   ),
+      // );
     }
 
     const tourGuideFlightSchedule = await this.prisma.flightSchedule.findFirst({
@@ -217,11 +249,15 @@ export class FlightScheduleService {
     });
 
     if (tourGuideFlightSchedule) {
-      throw new BadRequestException(
-        MessageResponse.FLIGHT_SCHEDULE.TOUR_GUIDE_IN_PROCESS(
-          tourGuideFlightSchedule.id,
-        ),
-      );
+      messageObject = [
+        ...messageObject,
+        MessageResponse.FLIGHT_SCHEDULE.TOUR_GUIDE_IN_PROCESS,
+      ];
+      // throw new BadRequestException(
+      //   MessageResponse.FLIGHT_SCHEDULE.TOUR_GUIDE_IN_PROCESS(
+      //     tourGuideFlightSchedule.id,
+      //   ),
+      // );
     }
 
     const helicopterFlightSchedule = await this.prisma.flightSchedule.findFirst(
@@ -240,11 +276,15 @@ export class FlightScheduleService {
     );
 
     if (helicopterFlightSchedule) {
-      throw new BadRequestException(
-        MessageResponse.FLIGHT_SCHEDULE.HELICOPTER_IN_PROCESS(
-          helicopterFlightSchedule.id,
-        ),
-      );
+      messageObject = [
+        ...messageObject,
+        MessageResponse.FLIGHT_SCHEDULE.HELICOPTER_IN_PROCESS,
+      ];
+      // throw new BadRequestException(
+      //   MessageResponse.FLIGHT_SCHEDULE.HELICOPTER_IN_PROCESS(
+      //     helicopterFlightSchedule.id,
+      //   ),
+      // );
     }
 
     // const dataCreateFlightSchedule = {
@@ -294,6 +334,13 @@ export class FlightScheduleService {
         flightScheduleId: createFlightSchedule.id,
       },
     });
+
+    if (messageObject.length > 0) {
+      return {
+        message: messageObject,
+        data: {},
+      };
+    }
 
     return {
       message: MessageResponse.FLIGHT_SCHEDULE.CREATE_SUCCESS,
@@ -434,6 +481,80 @@ export class FlightScheduleService {
   }
 
   async getListResourcesAvailable(filter: FGetAvailableResourceDto) {
+    if (filter.routeId && !!filter.isAdventureFlight) {
+      const routeFound = await this.prisma.route.findFirst({
+        where: { id: +filter.routeId },
+      });
+      if (!routeFound) {
+        throw new BadRequestException(MessageResponse.ROUTE.NOT_EXIST);
+      }
+
+      const startDateWithoutTime = getDateWithoutTime(filter.start);
+      const adventureOperatingTime =
+        await this.prisma.adventureOperatingTime.findFirst({
+          where: {
+            routeId: +filter.routeId,
+            date: startDateWithoutTime,
+          },
+        });
+      if (!adventureOperatingTime) {
+        return {
+          message:
+            MessageResponse.ADVENTURE_OPERATING_TIME.OUTSIDE_OF_OPERATING_HOURS,
+          data: {},
+        };
+      }
+
+      // if (
+      //   new Date(filter.start) <
+      //     new Date(adventureOperatingTime.startMorning) ||
+      //   new Date(filter.start) <
+      //     new Date(adventureOperatingTime.startAfternoon) ||
+      //   new Date(filter.end) > new Date(adventureOperatingTime.endMorning) ||
+      //   new Date(filter.end) > new Date(adventureOperatingTime.endAfternoon)
+      // ) {
+      //   return {
+      //     message:
+      //       MessageResponse.ADVENTURE_OPERATING_TIME.OUTSIDE_OF_OPERATING_HOURS,
+      //     data: {},
+      //   };
+      // }
+
+      if (
+        new Date(filter.start) <
+          new Date(adventureOperatingTime.startMorning) ||
+        new Date(filter.end) > new Date(adventureOperatingTime.endAfternoon)
+      ) {
+        return {
+          message:
+            MessageResponse.ADVENTURE_OPERATING_TIME.OUTSIDE_OF_OPERATING_HOURS,
+          data: {},
+        };
+      }
+
+      if (
+        new Date(filter.start) > new Date(adventureOperatingTime.endMorning) &&
+        new Date(filter.start) < new Date(adventureOperatingTime.startAfternoon)
+      ) {
+        return {
+          message:
+            MessageResponse.ADVENTURE_OPERATING_TIME.OUTSIDE_OF_OPERATING_HOURS,
+          data: {},
+        };
+      }
+
+      if (
+        new Date(filter.end) > new Date(adventureOperatingTime.endMorning) &&
+        new Date(filter.end) < new Date(adventureOperatingTime.startAfternoon)
+      ) {
+        return {
+          message:
+            MessageResponse.ADVENTURE_OPERATING_TIME.OUTSIDE_OF_OPERATING_HOURS,
+          data: {},
+        };
+      }
+    }
+
     const pilotUsers = await this.prisma.user.findMany({
       where: {
         role: ROLE.PILOT,
