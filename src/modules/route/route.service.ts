@@ -1,8 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { MessageResponse } from 'src/common/constants/message-response.constant';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateRouteDto } from './dto/create-route.dto';
+import { CreateRouteDto, GetListRouteDto } from './dto/create-route.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
+import { ROUTE_TYPE } from '@prisma/client';
 
 @Injectable()
 export class RouteService {
@@ -58,9 +59,15 @@ export class RouteService {
     };
   }
 
-  async getListRoute() {
+  async getListRoute(type?: GetListRouteDto) {
+    let where;
+    if (type) {
+      where = { isDelete: 0, type };
+    } else {
+      where = { isDelete: 0 };
+    }
     const listRouteFound = await this.prisma.route.findMany({
-      where: { isDelete: 0 },
+      where,
     });
 
     return {

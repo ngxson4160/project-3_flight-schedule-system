@@ -74,7 +74,9 @@ export class HelicopterService {
     //   },
     // });
 
-    const listHelicopterFound = await this.prisma.helicopter.findMany();
+    const listHelicopterFound = await this.prisma.helicopter.findMany({
+      where: { isDelete: 0 },
+    });
 
     return {
       message: MessageResponse.HELICOPTER.GET_LIST_SUCCESS,
@@ -91,9 +93,12 @@ export class HelicopterService {
       throw new BadRequestException(MessageResponse.HELICOPTER.NOT_EXIST);
     }
 
-    const deleteHelicopter = await this.prisma.helicopter.delete({
+    const deleteHelicopter = await this.prisma.helicopter.update({
       where: {
         id,
+      },
+      data: {
+        isDelete: 1,
       },
     });
 

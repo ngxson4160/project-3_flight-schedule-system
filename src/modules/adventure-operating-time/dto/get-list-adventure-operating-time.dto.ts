@@ -1,4 +1,4 @@
-import { IsISO8601, IsOptional } from 'class-validator';
+import { IsISO8601, IsOptional, IsString } from 'class-validator';
 
 export class FGetListAdventureOperatingTimeDto {
   @IsISO8601()
@@ -8,4 +8,8 @@ export class FGetListAdventureOperatingTimeDto {
   @IsISO8601()
   @IsOptional()
   endDate: Date;
+
+  @IsString()
+  @IsOptional()
+  routeId?: string;
 }

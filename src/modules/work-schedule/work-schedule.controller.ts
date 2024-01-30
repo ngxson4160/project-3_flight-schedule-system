@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { WorkScheduleService } from './work-schedule.service';
 import { Role } from 'src/auth/decorator/role.decorator';
@@ -46,7 +47,7 @@ export class WorkScheduleController {
   }
 
   @Get()
-  async getListWorkSchedule(@Body() getWorkSchedule: FGetListWorkScheduleDto) {
+  async getListWorkSchedule(@Query() getWorkSchedule: FGetListWorkScheduleDto) {
     return this.workScheduleService.getListWorkSchedule(getWorkSchedule);
   }
 

@@ -26,8 +26,20 @@ export class UserController {
 
   @Get()
   @Role(ROLE.PILOT, ROLE.ADMIN, ROLE.TOUR_GUIDE)
-  async getListStaff(@Query('type') type: EStaff) {
-    return this.userService.getListStaff(type);
+  async getListStaffByTYpe(@Query('type') type: EStaff) {
+    return this.userService.getListStaffByType(type);
+  }
+
+  @Get('/list-staff')
+  @Role(ROLE.PILOT, ROLE.ADMIN, ROLE.TOUR_GUIDE)
+  async getListStaff() {
+    return this.userService.getListStaff();
+  }
+
+  @Get(':id')
+  @Role(ROLE.PILOT, ROLE.ADMIN, ROLE.TOUR_GUIDE, ROLE.CUSTOMER)
+  async getDetail(@Param('id') id: string) {
+    return this.userService.getDetail(+id);
   }
 
   // @Put('/work-schedule/:id')

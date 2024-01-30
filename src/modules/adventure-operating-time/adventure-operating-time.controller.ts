@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { AdventureOperatingTimeService } from './adventure-operating-time.service';
 import { Role } from 'src/auth/decorator/role.decorator';
@@ -47,7 +48,7 @@ export class AdventureOperatingTimeController {
 
   @Get()
   async getListAdventureOperatingTime(
-    @Body() getListAdventureOperatingTime: FGetListAdventureOperatingTimeDto,
+    @Query() getListAdventureOperatingTime: FGetListAdventureOperatingTimeDto,
   ) {
     return this.adventureOperatingTimeService.getListAdventureOperatingTime(
       getListAdventureOperatingTime,

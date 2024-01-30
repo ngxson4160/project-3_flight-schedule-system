@@ -1,8 +1,9 @@
-import { IsISO8601, IsOptional } from 'class-validator';
+import { IsISO8601, IsOptional, IsString } from 'class-validator';
 
 export class FGetListWorkScheduleDto {
+  @IsString()
   @IsOptional()
-  userId?: number;
+  userId?: string;
 
   @IsISO8601()
   @IsOptional()

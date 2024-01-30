@@ -188,6 +188,9 @@ export class AdventureOperatingTimeService {
     // });
 
     let whereQuery = {};
+    if (filter.routeId) {
+      whereQuery = { ...whereQuery, routeId: +filter.routeId };
+    }
     if (filter.startDate) {
       whereQuery = { ...whereQuery, date: { gte: new Date(filter.startDate) } };
     }

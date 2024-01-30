@@ -148,7 +148,7 @@ export class WorkScheduleService {
       };
     }
     if (filter.userId) {
-      whereQuery = { userId: filter.userId, ...whereQuery };
+      whereQuery = { userId: +filter.userId, ...whereQuery };
     }
 
     const listWorkScheduleFound = await this.prisma.workSchedule.findMany({

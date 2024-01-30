@@ -12,6 +12,7 @@ import { RouteModule } from './modules/route/route.module';
 import { UserModule } from './modules/user/user.module';
 import { UserFlightScheduleModule } from './modules/user-flight-schedule/user-flight-schedule.module';
 import { WorkScheduleModule } from './modules/work-schedule/work-schedule.module';
+import { ConfigurationModule } from './modules/configuration/configuration.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { WorkScheduleModule } from './modules/work-schedule/work-schedule.module
     FlightScheduleModule,
     UserFlightScheduleModule,
     WorkScheduleModule,
+    ConfigurationModule,
     ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController],

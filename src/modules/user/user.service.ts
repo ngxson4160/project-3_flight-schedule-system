@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { MessageResponse } from 'src/common/constants/message-response.constant';
 import { FGetListWorkScheduleDto } from '../work-schedule/dto/get-list-work-schedule.dto';
 import { UpdateWorkScheduleDto } from './dto/update-work-schedule';
-import { WORK_SCHEDULE_STATUS } from '@prisma/client';
+import { ROLE, WORK_SCHEDULE_STATUS } from '@prisma/client';
 import { EStaff } from './dto/get-list-staff.dto';
 
 @Injectable()
@@ -57,7 +57,7 @@ export class UserService {
     };
   }
 
-  async getListStaff(type: EStaff) {
+  async getListStaffByType(type: EStaff) {
     const listStaffFound = await this.prisma.user.findMany({
       where: { role: type },
     });
@@ -65,6 +65,28 @@ export class UserService {
     return {
       message: MessageResponse.USER.GET_PROFILE_SUCCESS,
       data: listStaffFound,
+    };
+  }
+
+  async getListStaff() {
+    const listStaffFound = await this.prisma.user.findMany({
+      where: { OR: [{ role: ROLE.PILOT }, { role: ROLE.TOUR_GUIDE }] },
+    });
+
+    return {
+      message: MessageResponse.USER.GET_PROFILE_SUCCESS,
+      data: listStaffFound,
+    };
+  }
+
+  async getDetail(id: number) {
+    const userFound = await this.prisma.user.findFirst({
+      where: { id },
+    });
+
+    return {
+      message: MessageResponse.USER.GET_PROFILE_SUCCESS,
+      data: userFound,
     };
   }
 

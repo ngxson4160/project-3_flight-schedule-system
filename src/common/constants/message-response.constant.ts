@@ -104,4 +104,8 @@ export const MessageResponse = {
     INVALID_RESOLVE_HIRE_PRICE:
       'Prices cannot be added when helicopter rentals are not accepted',
   },
+
+  CONFIGURATION: {
+    GET_VALUE_SUCCESS: 'Get value successfully',
+  },
 };

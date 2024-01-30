@@ -299,6 +299,13 @@ export class FlightScheduleService {
     //   capacity: createFlightScheduleDto.capacity,
     // };
 
+    if (messageObject.length > 0) {
+      return {
+        message: messageObject,
+        data: {},
+      };
+    }
+
     const dataCreateFlightSchedule = {
       ...createFlightScheduleDto,
       end: new Date(endTime),
@@ -334,13 +341,6 @@ export class FlightScheduleService {
         flightScheduleId: createFlightSchedule.id,
       },
     });
-
-    if (messageObject.length > 0) {
-      return {
-        message: messageObject,
-        data: {},
-      };
-    }
 
     return {
       message: MessageResponse.FLIGHT_SCHEDULE.CREATE_SUCCESS,
@@ -525,6 +525,7 @@ export class FlightScheduleService {
           new Date(adventureOperatingTime.startMorning) ||
         new Date(filter.end) > new Date(adventureOperatingTime.endAfternoon)
       ) {
+        console.log('run here');
         return {
           message:
             MessageResponse.ADVENTURE_OPERATING_TIME.OUTSIDE_OF_OPERATING_HOURS,

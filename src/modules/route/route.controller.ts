@@ -6,11 +6,12 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { RouteService } from './route.service';
 import { Role } from 'src/auth/decorator/role.decorator';
-import { ROLE } from '@prisma/client';
-import { CreateRouteDto } from './dto/create-route.dto';
+import { ROLE, ROUTE_TYPE } from '@prisma/client';
+import { CreateRouteDto, GetListRouteDto } from './dto/create-route.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
 
 @Controller('routes')
@@ -38,8 +39,8 @@ export class RouteController {
   }
 
   @Get()
-  async getListRoute() {
-    return this.routeService.getListRoute();
+  async getListRoute(@Query('type') type: GetListRouteDto) {
+    return this.routeService.getListRoute(type);
   }
 
   @Delete('/:id')

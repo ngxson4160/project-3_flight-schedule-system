@@ -14,7 +14,7 @@ export class CreateRouteDto {
   @IsArray()
   locations: object;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
   description?: string;
 
@@ -29,4 +29,10 @@ export class CreateRouteDto {
 
   @IsEnum(ROUTE_TYPE)
   type: ROUTE_TYPE;
+}
+
+export class GetListRouteDto {
+  @IsEnum(() => ROUTE_TYPE)
+  @IsOptional()
+  type?: ROUTE_TYPE;
 }
