@@ -90,14 +90,14 @@ export const MessageResponse = {
       return `The pilot is on another flight with id ${id}`;
     },
     TOUR_GUIDE_IN_PROCESS(id: number) {
-      return `The tour guide is on another flight ${id}`;
+      return `The tour guide is on another flight with id ${id}`;
     },
     HELICOPTER_IN_PROCESS(id: number) {
       return `The helicopter is on another flight ${id}`;
     },
     CREATE_SUCCESS: 'Create flight schedule time time successfully!',
     CANCEL_SUCCESS: 'Cancel flight schedule time time successfully!',
-    FLIGHT_NOT_BELONG_TO_USER: 'Flight schedule not belong to custom!',
+    FLIGHT_NOT_BELONG_TO_USER: 'Flight schedule not belong to customer!',
     INVALID_TIME_CANCEL:
       'Cancellation time exceeded (can only be canceled within 1 hour)!',
     RESOLVE_HIRE_SUCCESS: 'Resolve hire helicopter successfully',

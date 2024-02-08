@@ -38,6 +38,15 @@ export class HelicopterService {
       throw new BadRequestException(MessageResponse.HELICOPTER.NOT_EXIST);
     }
 
+    if (updateHelicopterDto.name) {
+      const helicopterFound = await this.prisma.helicopter.findUnique({
+        where: { name: updateHelicopterDto.name },
+      });
+      if (helicopterFound) {
+        throw new BadRequestException(MessageResponse.HELICOPTER.EXIST);
+      }
+    }
+
     const newHelicopter = await this.prisma.helicopter.update({
       where: {
         id,

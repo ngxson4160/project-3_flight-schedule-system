@@ -156,7 +156,7 @@ export class FlightScheduleService {
         },
       },
     });
-    if (flightSchedule.length >= 2) {
+    if (flightSchedule.length >= 1) {
       messageObject = [
         ...messageObject,
         MessageResponse.FLIGHT_SCHEDULE.EXCEED_NUMBER,
@@ -215,7 +215,9 @@ export class FlightScheduleService {
     if (pilotFlightSchedule) {
       messageObject = [
         ...messageObject,
-        MessageResponse.FLIGHT_SCHEDULE.PILOT_IN_PROCESS,
+        MessageResponse.FLIGHT_SCHEDULE.PILOT_IN_PROCESS(
+          pilotFlightSchedule.id,
+        ),
       ];
       // throw new BadRequestException(
       //   MessageResponse.FLIGHT_SCHEDULE.PILOT_IN_PROCESS(
@@ -251,7 +253,9 @@ export class FlightScheduleService {
     if (tourGuideFlightSchedule) {
       messageObject = [
         ...messageObject,
-        MessageResponse.FLIGHT_SCHEDULE.TOUR_GUIDE_IN_PROCESS,
+        MessageResponse.FLIGHT_SCHEDULE.TOUR_GUIDE_IN_PROCESS(
+          tourGuideFlightSchedule.id,
+        ),
       ];
       // throw new BadRequestException(
       //   MessageResponse.FLIGHT_SCHEDULE.TOUR_GUIDE_IN_PROCESS(
@@ -278,7 +282,9 @@ export class FlightScheduleService {
     if (helicopterFlightSchedule) {
       messageObject = [
         ...messageObject,
-        MessageResponse.FLIGHT_SCHEDULE.HELICOPTER_IN_PROCESS,
+        MessageResponse.FLIGHT_SCHEDULE.HELICOPTER_IN_PROCESS(
+          helicopterFlightSchedule.id,
+        ),
       ];
       // throw new BadRequestException(
       //   MessageResponse.FLIGHT_SCHEDULE.HELICOPTER_IN_PROCESS(
@@ -466,7 +472,7 @@ export class FlightScheduleService {
       );
     }
 
-    await this.prisma.flightSchedule.update({
+    const flightScheduleCancel = await this.prisma.flightSchedule.update({
       where: {
         id,
       },
@@ -477,6 +483,7 @@ export class FlightScheduleService {
 
     return {
       message: MessageResponse.FLIGHT_SCHEDULE.CANCEL_SUCCESS,
+      data: flightScheduleCancel,
     };
   }
 
@@ -1084,8 +1091,15 @@ export class FlightScheduleService {
       });
     }
 
+    const scheduleHireUpdate = await this.prisma.flightSchedule.findFirst({
+      where: {
+        id: flightScheduleHireFound.id,
+      },
+    });
+
     return {
       message: MessageResponse.FLIGHT_SCHEDULE.RESOLVE_HIRE_SUCCESS,
+      data: scheduleHireUpdate,
     };
   }
 

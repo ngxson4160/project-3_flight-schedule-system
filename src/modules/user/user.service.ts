@@ -84,6 +84,9 @@ export class UserService {
       where: { id },
     });
 
+    if (!userFound)
+      throw new BadRequestException(MessageResponse.USER.NOT_EXIST);
+
     return {
       message: MessageResponse.USER.GET_PROFILE_SUCCESS,
       data: userFound,

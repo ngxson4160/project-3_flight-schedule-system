@@ -67,16 +67,16 @@ export class UpdateWorkScheduleDto {
 
 export class RequestUpdateWorkScheduleDto {
   @IsString()
-  @Matches(RegexConstant.TimeReg_HH_MM, {
-    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
-  })
+  // @Matches(RegexConstant.TimeReg_HH_MM, {
+  //   message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  // })
   @IsOptional()
   startTime?: string;
 
   @IsString()
-  @Matches(RegexConstant.TimeReg_HH_MM, {
-    message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
-  })
+  // @Matches(RegexConstant.TimeReg_HH_MM, {
+  //   message: MessageResponse.COMMON.INVALID_HOUR_MINUS_FORMAT,
+  // })
   @IsOptional()
   endTime?: string;
 

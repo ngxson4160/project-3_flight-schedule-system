@@ -429,8 +429,14 @@ export class WorkScheduleService {
       });
     }
 
+    const workScheduleChildUpdateFound =
+      await this.prisma.workSchedule.findFirst({
+        where: { id: workScheduleChildFound.id },
+      });
+
     return {
       message: MessageResponse.WORK_SCHEDULE.Resolve_UPDATE_SUCCESS,
+      data: workScheduleChildUpdateFound,
     };
   }
 }
